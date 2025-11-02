@@ -1,0 +1,154 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+import { Publicaciones } from './pages/Publicaciones';
+import { Mensajeria } from './pages/Mensajeria';
+import { Calificaciones } from './pages/Calificaciones';
+import { Pagos } from './pages/Pagos';
+import { Asistencia } from './pages/Asistencia';
+import { MatriculaWeb } from './pages/MatriculaWeb';
+import { HorarioEscolar } from './pages/HorarioEscolar';
+import { MisCursos } from './pages/MisCursos';
+import { Horario } from './pages/Horario';
+import { Usuarios } from './pages/Usuarios';
+import { Cursos } from './pages/Cursos';
+import { Reportes } from './pages/Reportes';
+import { Unauthorized } from './pages/Unauthorized';
+import './App.css';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/publicaciones"
+            element={
+              <ProtectedRoute>
+                <Publicaciones />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/mensajeria"
+            element={
+              <ProtectedRoute>
+                <Mensajeria />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/calificaciones"
+            element={
+              <ProtectedRoute>
+                <Calificaciones />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/pagos"
+            element={
+              <ProtectedRoute>
+                <Pagos />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/asistencia"
+            element={
+              <ProtectedRoute>
+                <Asistencia />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/matricula-web"
+            element={
+              <ProtectedRoute>
+                <MatriculaWeb />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/horario-escolar"
+            element={
+              <ProtectedRoute>
+                <HorarioEscolar />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/mis-cursos"
+            element={
+              <ProtectedRoute>
+                <MisCursos />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/horario"
+            element={
+              <ProtectedRoute>
+                <Horario />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/usuarios"
+            element={
+              <ProtectedRoute>
+                <Usuarios />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/cursos"
+            element={
+              <ProtectedRoute>
+                <Cursos />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute>
+                <Reportes />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
