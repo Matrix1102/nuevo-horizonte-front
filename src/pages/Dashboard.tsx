@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { Layout } from '../components/Layout';
+import { Link } from 'react-router-dom';
 import { MdClass, MdGrade, MdSchedule, MdAssignment, MdPeople, MdAssessment, MdPayment, MdCalendarToday, MdLibraryBooks } from 'react-icons/md';
 
 export function Dashboard() {
@@ -30,24 +31,31 @@ export function Dashboard() {
                 Accede a tus cursos y materiales de estudio
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-warm-500"><MdGrade /></span>
-                <h3 className="text-primary-500 text-xl font-semibold">Calificaciones</h3>
+
+            <Link to="/calificaciones" className="no-underline">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl text-warm-500"><MdGrade /></span>
+                  <h3 className="text-primary-500 text-xl font-semibold">Calificaciones</h3>
+                </div>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  Consulta tus notas y rendimiento académico
+                </p>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Consulta tus notas y rendimiento académico
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-secondary-500">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-secondary-500"><MdSchedule /></span>
-                <h3 className="text-primary-500 text-xl font-semibold">Horario</h3>
+            </Link>
+
+            <Link to="/horario-escolar" className="no-underline">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-secondary-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl text-secondary-500"><MdSchedule /></span>
+                  <h3 className="text-primary-500 text-xl font-semibold">Horario</h3>
+                </div>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  Revisa tu horario de clases
+                </p>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Revisa tu horario de clases
-              </p>
-            </div>
+            </Link>
+            
             <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl text-accent-500"><MdAssignment /></span>
