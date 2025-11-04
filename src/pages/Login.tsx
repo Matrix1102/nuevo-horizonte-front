@@ -107,7 +107,7 @@ export function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-12 pr-12 py-3 border-2 border-white/30 bg-white/90 rounded-xl text-base transition-all focus:outline-none focus:border-accent-500 focus:shadow-lg focus:bg-white"
-                    placeholder="E0567"
+                    placeholder="usuario@colegio.com"
                     required
                   />
                 </div>

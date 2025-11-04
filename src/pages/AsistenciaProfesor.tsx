@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Layout } from '../components/Layout';
-import { MdCheckCircle, MdSave, MdCalendarToday, MdClose } from 'react-icons/md';
+import { MdCheckCircle, MdSave, MdCalendarToday, MdClose, MdExpandMore, MdCheck, MdCancel, MdEventNote, MdOutlineAccessTime, MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
+import { Listbox, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
-type AttendanceStatus = 'Presente' | 'Falta injustificada' | 'Falta justificada';
+type AttendanceStatus = 'Presente' | 'Ausente' | 'Falta justificada' | 'Tardanza';
 
 type StudentAttendance = {
   studentId: string;
@@ -10,11 +12,10 @@ type StudentAttendance = {
   status: AttendanceStatus;
 };
 
-type ClassSession = {
+type DayAttendance = {
   date: string; // ISO format (YYYY-MM-DD)
   courseId: string;
   courseName: string;
-  topic: string;
   attendance: StudentAttendance[];
 };
 
@@ -25,91 +26,154 @@ const simulatedStudents = [
   { studentId: 's3', studentName: 'María López' },
   { studentId: 's4', studentName: 'José Bayona' },
   { studentId: 's5', studentName: 'Laura Díaz' },
-  { studentId: 's6', studentName: 'Pedro Silva' },
-  { studentId: 's7', studentName: 'Sofia Rojas' },
-  { studentId: 's8', studentName: 'Diego Castro' },
-];
-
-const initialSessions: ClassSession[] = [
-  {
-    date: '2025-11-03',
-    courseId: 'c1',
-    courseName: 'Matemáticas - 3° A',
-    topic: 'Ecuaciones lineales',
-    attendance: simulatedStudents.slice(0, 5).map((s) => ({
-      studentId: s.studentId,
-      studentName: s.studentName,
-      status: 'Presente' as AttendanceStatus,
-    })),
-  },
-  {
-    date: '2025-11-02',
-    courseId: 'c1',
-    courseName: 'Matemáticas - 3° A',
-    topic: 'Geometría básica',
-    attendance: simulatedStudents.slice(0, 5).map((s, idx) => ({
-      studentId: s.studentId,
-      studentName: s.studentName,
-      status: (idx === 2 ? 'Falta justificada' : 'Presente') as AttendanceStatus,
-    })),
-  },
-  {
-    date: '2025-11-01',
-    courseId: 'c2',
-    courseName: 'Comunicación - 3° B',
-    topic: 'Análisis literario',
-    attendance: simulatedStudents.slice(5, 8).map((s) => ({
-      studentId: s.studentId,
-      studentName: s.studentName,
-      status: 'Presente' as AttendanceStatus,
-    })),
-  },
 ];
 
 const courses = [
   {
     courseId: 'c1',
     courseName: 'Matemáticas - 3° A',
-    students: simulatedStudents.slice(0, 5),
+    students: simulatedStudents,
   },
   {
     courseId: 'c2',
     courseName: 'Comunicación - 3° B',
-    students: simulatedStudents.slice(5, 8),
+    students: simulatedStudents,
   },
 ];
 
-export function AsistenciaProfesor() {
-  const [sessions, setSessions] = useState<ClassSession[]>(initialSessions);
-  const [selectedCourse, setSelectedCourse] = useState<string>(courses[0].courseId);
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [topic, setTopic] = useState<string>('');
-  const [currentAttendance, setCurrentAttendance] = useState<StudentAttendance[]>([]);
-  const [isRecording, setIsRecording] = useState(false);
+// Generar datos de asistencia por días (solo días de semana)
+function generateAttendanceData(courseId: string, courseName: string): DayAttendance[] {
+  const data: DayAttendance[] = [];
+  const startDate = new Date('2025-03-01');
+  const endDate = new Date('2025-06-30');
 
-  const filteredSessions = useMemo(
-    () => sessions.filter((s) => s.courseId === selectedCourse).sort((a, b) => b.date.localeCompare(a.date)),
-    [sessions, selectedCourse]
-  );
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    // Usar la fecha en formato local para verificar el día de la semana
+    const localDate = new Date(year, d.getMonth(), d.getDate());
+    const dayOfWeek = localDate.getDay();
+    
+    if (dayOfWeek === 0 || dayOfWeek === 6) continue; // Skip weekends
+
+    const attendance: StudentAttendance[] = simulatedStudents.map((student) => {
+      const rand = Math.random();
+      let status: AttendanceStatus;
+      if (rand < 0.75) status = 'Presente';
+      else if (rand < 0.83) status = 'Ausente';
+      else if (rand < 0.90) status = 'Falta justificada';
+      else status = 'Tardanza';
+
+      return {
+        studentId: student.studentId,
+        studentName: student.studentName,
+        status,
+      };
+    });
+
+    data.push({
+      date: dateStr,
+      courseId,
+      courseName,
+      attendance,
+    });
+  }
+
+  return data; // Mantener orden ascendente (más antiguos primero)
+}
+
+export function AsistenciaProfesor() {
+  const [selectedCourse, setSelectedCourse] = useState<string>(courses[0].courseId);
+  const [selectedMonth, setSelectedMonth] = useState<number>(10); // Noviembre (mes actual)
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [currentAttendance, setCurrentAttendance] = useState<StudentAttendance[]>([]);
+  const [selectedDayData, setSelectedDayData] = useState<DayAttendance | null>(null);
+
+  const months = [
+    { value: 2, label: 'Marzo' },
+    { value: 3, label: 'Abril' },
+    { value: 4, label: 'Mayo' },
+    { value: 5, label: 'Junio' },
+    { value: 6, label: 'Julio' },
+    { value: 7, label: 'Agosto' },
+    { value: 8, label: 'Septiembre' },
+    { value: 9, label: 'Octubre' },
+    { value: 10, label: 'Noviembre' },
+    { value: 11, label: 'Diciembre' },
+  ];
 
   const currentCourse = useMemo(
     () => courses.find((c) => c.courseId === selectedCourse),
     [selectedCourse]
   );
 
+  // Generate attendance data for selected course
+  const allAttendanceData = useMemo(() => {
+    if (!currentCourse) return [];
+    return generateAttendanceData(currentCourse.courseId, currentCourse.courseName);
+  }, [currentCourse]);
+
+  // Filter by selected month
+  const monthFilteredData = useMemo(() => {
+    return allAttendanceData.filter((day) => {
+      const date = new Date(day.date + 'T00:00:00');
+      const dayOfWeek = date.getDay();
+      // Excluir fines de semana (0 = Domingo, 6 = Sábado)
+      if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+      return date.getMonth() === selectedMonth;
+    });
+  }, [allAttendanceData, selectedMonth]);
+
+  // Group into weeks (Mon-Fri)
+  const weeks = useMemo(() => {
+    const grouped: DayAttendance[][] = [];
+    let currentWeek: DayAttendance[] = [];
+
+    monthFilteredData.forEach((day) => {
+      const date = new Date(day.date + 'T00:00:00');
+      const dayOfWeek = date.getDay(); // 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie
+
+      // Si es lunes y ya tenemos días de la semana anterior, cerramos esa semana
+      if (dayOfWeek === 1 && currentWeek.length > 0) {
+        grouped.push([...currentWeek]);
+        currentWeek = [];
+      }
+
+      // Agregamos el día actual
+      currentWeek.push(day);
+
+      // Si es viernes, cerramos la semana
+      if (dayOfWeek === 5 && currentWeek.length > 0) {
+        grouped.push([...currentWeek]);
+        currentWeek = [];
+      }
+    });
+
+    // Si queda una semana incompleta al final, la agregamos
+    if (currentWeek.length > 0) {
+      grouped.push(currentWeek);
+    }
+
+    return grouped;
+  }, [monthFilteredData]);
+
+  const currentWeek = weeks[currentWeekIndex] || [];
+
   function startRecording() {
     if (!currentCourse) return;
     
-    // Check if attendance already exists for this date
-    const existing = sessions.find(
-      (s) => s.courseId === selectedCourse && s.date === selectedDate
+    const existing = allAttendanceData.find(
+      (d) => d.courseId === selectedCourse && d.date === selectedDate
     );
 
     if (existing) {
-      setTopic(existing.topic);
       setCurrentAttendance([...existing.attendance]);
     } else {
-      setTopic('');
       setCurrentAttendance(
         currentCourse.students.map((s) => ({
           studentId: s.studentId,
@@ -128,41 +192,22 @@ export function AsistenciaProfesor() {
   }
 
   function saveAttendance() {
-    if (!currentCourse || !topic.trim()) {
-      alert('Por favor ingrese el tema de la clase');
-      return;
-    }
-
-    const newSession: ClassSession = {
-      date: selectedDate,
-      courseId: selectedCourse,
-      courseName: currentCourse.courseName,
-      topic: topic.trim(),
-      attendance: currentAttendance,
-    };
-
-    setSessions((prev) => {
-      const filtered = prev.filter(
-        (s) => !(s.courseId === selectedCourse && s.date === selectedDate)
-      );
-      return [newSession, ...filtered];
-    });
-
+    if (!currentCourse) return;
     setIsRecording(false);
-    setTopic('');
     setCurrentAttendance([]);
+    alert('Asistencia guardada correctamente');
   }
 
   function cancelRecording() {
     setIsRecording(false);
-    setTopic('');
     setCurrentAttendance([]);
   }
 
-  const statusColors: Record<AttendanceStatus, string> = {
-    Presente: 'bg-green-500 hover:bg-green-600',
-    'Falta injustificada': 'bg-red-500 hover:bg-red-600',
-    'Falta justificada': 'bg-yellow-500 hover:bg-yellow-600',
+  const statusBorders: Record<AttendanceStatus, string> = {
+    Presente: 'border-green-500',
+    Ausente: 'border-red-500',
+    'Falta justificada': 'border-orange-500',
+    Tardanza: 'border-yellow-500',
   };
 
   return (
@@ -174,58 +219,141 @@ export function AsistenciaProfesor() {
         <h2 className="text-primary-500 text-2xl font-bold">Asistencia - Profesor</h2>
       </div>
 
+      {/* Filters */}
       <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium">Curso:</label>
-            <select
-              className="form-select px-3 py-2 rounded border bg-white text-sm"
+            <Listbox
               value={selectedCourse}
-              onChange={(e) => setSelectedCourse(e.target.value)}
+              onChange={(val) => {
+                setSelectedCourse(val);
+                setCurrentWeekIndex(0);
+              }}
               disabled={isRecording}
             >
-              {courses.map((c) => (
-                <option key={c.courseId} value={c.courseId}>
-                  {c.courseName}
-                </option>
-              ))}
-            </select>
+              <div className="relative">
+                <Listbox.Button className="relative w-48 cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left text-sm border border-gray-300 hover:border-accent-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span className="block truncate">
+                    {courses.find((c) => c.courseId === selectedCourse)?.courseName || 'Seleccionar'}
+                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <MdExpandMore className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
+                </Listbox.Button>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-48 overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    {courses.map((course) => (
+                      <Listbox.Option
+                        key={course.courseId}
+                        value={course.courseId}
+                        className={({ active }) =>
+                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                            active ? 'bg-accent-100 text-accent-900' : 'text-gray-900'
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <>
+                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                              {course.courseName}
+                            </span>
+                            {selected ? (
+                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-accent-600">
+                                <MdCheck className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>
+              </div>
+            </Listbox>
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium">Fecha:</label>
-            <input
-              type="date"
-              className="form-input px-3 py-2 rounded border text-sm"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              disabled={isRecording}
-            />
+            <label className="text-sm font-medium">Mes:</label>
+            <Listbox
+              value={selectedMonth}
+              onChange={(val) => {
+                setSelectedMonth(val);
+                setCurrentWeekIndex(0);
+              }}
+            >
+              <div className="relative">
+                <Listbox.Button className="relative w-40 cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left text-sm border border-gray-300 hover:border-accent-500 transition-colors">
+                  <span className="block truncate">
+                    {months.find((m) => m.value === selectedMonth)?.label || 'Seleccionar'}
+                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <MdExpandMore className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
+                </Listbox.Button>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-40 overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    {months.map((month) => (
+                      <Listbox.Option
+                        key={month.value}
+                        value={month.value}
+                        className={({ active }) =>
+                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                            active ? 'bg-accent-100 text-accent-900' : 'text-gray-900'
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <>
+                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                              {month.label}
+                            </span>
+                            {selected ? (
+                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-accent-600">
+                                <MdCheck className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>
+              </div>
+            </Listbox>
           </div>
 
           {!isRecording && (
-            <button
-              onClick={startRecording}
-              className="flex items-center gap-2 px-4 py-2 rounded bg-accent-500 text-white hover:opacity-95"
-            >
-              <MdCalendarToday /> Tomar Asistencia
-            </button>
+            <div className="flex items-center gap-3 md:ml-auto">
+              <label className="text-sm font-medium">Fecha:</label>
+              <input
+                type="date"
+                className="form-input px-3 py-2 rounded-lg border border-gray-300 hover:border-accent-500 transition-colors text-sm"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+              <button
+                onClick={startRecording}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600 transition-colors shadow-sm hover:shadow-md"
+              >
+                <MdCalendarToday /> Tomar Asistencia
+              </button>
+            </div>
           )}
         </div>
 
         {isRecording && (
-          <div className="border-t pt-6">
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Tema de la clase:</label>
-              <input
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="Ej: Ecuaciones de primer grado"
-                className="w-full px-3 py-2 border rounded"
-              />
-            </div>
-
+          <div className="border-t mt-6 pt-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-3">Lista de Alumnos</h3>
               <div className="space-y-3">
@@ -238,33 +366,43 @@ export function AsistenciaProfesor() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => updateStatus(student.studentId, 'Presente')}
-                        className={`px-4 py-2 rounded text-white text-sm font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
                           student.status === 'Presente'
-                            ? statusColors['Presente']
-                            : 'bg-gray-300 hover:bg-gray-400'
+                            ? 'bg-green-500 shadow-md scale-105'
+                            : 'bg-gray-300 hover:bg-green-400'
                         }`}
                       >
                         Presente
                       </button>
                       <button
-                        onClick={() => updateStatus(student.studentId, 'Falta injustificada')}
-                        className={`px-4 py-2 rounded text-white text-sm font-medium transition-colors ${
-                          student.status === 'Falta injustificada'
-                            ? statusColors['Falta injustificada']
-                            : 'bg-gray-300 hover:bg-gray-400'
+                        onClick={() => updateStatus(student.studentId, 'Ausente')}
+                        className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+                          student.status === 'Ausente'
+                            ? 'bg-red-500 shadow-md scale-105'
+                            : 'bg-gray-300 hover:bg-red-400'
                         }`}
                       >
-                        Falta
+                        Ausente
                       </button>
                       <button
                         onClick={() => updateStatus(student.studentId, 'Falta justificada')}
-                        className={`px-4 py-2 rounded text-white text-sm font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
                           student.status === 'Falta justificada'
-                            ? statusColors['Falta justificada']
-                            : 'bg-gray-300 hover:bg-gray-400'
+                            ? 'bg-orange-500 shadow-md scale-105'
+                            : 'bg-gray-300 hover:bg-orange-400'
                         }`}
                       >
                         Justificado
+                      </button>
+                      <button
+                        onClick={() => updateStatus(student.studentId, 'Tardanza')}
+                        className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+                          student.status === 'Tardanza'
+                            ? 'bg-yellow-500 shadow-md scale-105'
+                            : 'bg-gray-300 hover:bg-yellow-400'
+                        }`}
+                      >
+                        Tardanza
                       </button>
                     </div>
                   </div>
@@ -275,13 +413,13 @@ export function AsistenciaProfesor() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={cancelRecording}
-                className="flex items-center gap-2 px-4 py-2 rounded border border-gray-300 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 <MdClose /> Cancelar
               </button>
               <button
                 onClick={saveAttendance}
-                className="flex items-center gap-2 px-4 py-2 rounded bg-green-500 text-white hover:opacity-95"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors shadow-sm hover:shadow-md"
               >
                 <MdSave /> Guardar Asistencia
               </button>
@@ -290,57 +428,272 @@ export function AsistenciaProfesor() {
         )}
       </div>
 
-      {/* Historial de Asistencia */}
+      {/* Legend */}
+      {!isRecording && (
+        <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-accent-500 mb-6">
+          <div className="flex flex-wrap gap-4 items-center justify-center">
+            <div className="flex items-center gap-2">
+              <MdCheckCircle className="text-green-600 text-xl" />
+              <span className="text-sm">Presente</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MdCancel className="text-red-600 text-xl" />
+              <span className="text-sm">Ausente</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MdEventNote className="text-orange-600 text-xl" />
+              <span className="text-sm">Falta justificada</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MdOutlineAccessTime className="text-yellow-600 text-xl" />
+              <span className="text-sm">Tardanza</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attendance by Days */}
       {!isRecording && (
         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500">
           <h3 className="text-lg font-semibold mb-4">Historial de Asistencia</h3>
-          
-          {filteredSessions.length === 0 ? (
+
+          {currentWeek.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
-              No hay registros de asistencia para este curso
+              No hay registros de asistencia para este período
             </div>
           ) : (
-            <div className="divide-y">
-              {filteredSessions.map((session) => (
-                <div key={`${session.date}-${session.courseId}`} className="py-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <div className="font-semibold text-gray-800">{session.topic}</div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(session.date + 'T00:00:00').toLocaleDateString('es-PE', {
-                          weekday: 'long',
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
+            <>
+              <div className="mb-4">
+                <h4 className="text-base font-semibold text-gray-700 mb-3">
+                  Semana {currentWeekIndex + 1}
+                </h4>
+                <div className="text-sm text-gray-500 mb-4">
+                  {currentWeek.length > 0 && (
+                    <>
+                      {new Date(currentWeek[0].date + 'T00:00:00').toLocaleDateString('es-PE', {
+                        day: '2-digit',
+                        month: 'long',
+                      })}{' '}
+                      -{' '}
+                      {new Date(currentWeek[currentWeek.length - 1].date + 'T00:00:00').toLocaleDateString('es-PE', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+                {currentWeek.map((day) => {
+                  const date = new Date(day.date + 'T00:00:00');
+                  const presentCount = day.attendance.filter((a) => a.status === 'Presente').length;
+                  const absentCount = day.attendance.filter((a) => a.status === 'Ausente').length;
+                  const justifiedCount = day.attendance.filter((a) => a.status === 'Falta justificada').length;
+                  const lateCount = day.attendance.filter((a) => a.status === 'Tardanza').length;
+                  const totalCount = day.attendance.length;
+
+                  return (
+                    <div
+                      key={day.date}
+                      onClick={() => setSelectedDayData(day)}
+                      className={`border-2 rounded-lg p-3 space-y-2 h-[280px] flex flex-col cursor-pointer hover:shadow-lg transition-shadow ${
+                        statusBorders[
+                          presentCount === totalCount
+                            ? 'Presente'
+                            : presentCount === 0
+                            ? 'Ausente'
+                            : 'Tardanza'
+                        ]
+                      }`}
+                    >
+                      <div className="text-center border-b pb-2 flex-shrink-0">
+                        <div className="text-xs text-gray-500 capitalize">
+                          {date.toLocaleDateString('es-PE', { weekday: 'long' })}
+                        </div>
+                        <div className="text-2xl font-bold">
+                          {date.toLocaleDateString('es-PE', { day: '2-digit' })}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 text-xs flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <MdCheckCircle className="text-green-600" />
+                            <span>Presente</span>
+                          </div>
+                          <span className="font-semibold">{presentCount}</span>
+                        </div>
+                        
+                        {absentCount > 0 && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <MdCancel className="text-red-600" />
+                              <span>Ausente</span>
+                            </div>
+                            <span className="font-semibold">{absentCount}</span>
+                          </div>
+                        )}
+                        
+                        {justifiedCount > 0 && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <MdEventNote className="text-orange-600" />
+                              <span>Justificado</span>
+                            </div>
+                            <span className="font-semibold">{justifiedCount}</span>
+                          </div>
+                        )}
+                        
+                        {lateCount > 0 && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <MdOutlineAccessTime className="text-yellow-600" />
+                              <span>Tardanza</span>
+                            </div>
+                            <span className="font-semibold">{lateCount}</span>
+                          </div>
+                        )}
+                      </div>
+                        
+                      <div className="flex items-center justify-between pt-1 border-t font-semibold text-xs flex-shrink-0">
+                        <span>Total</span>
+                        <span>{totalCount}</span>
                       </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {session.attendance.filter((a) => a.status === 'Presente').length} /{' '}
-                      {session.attendance.length} presentes
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-center gap-4 pt-4 border-t">
+                <button
+                  onClick={() => setCurrentWeekIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={currentWeekIndex === 0}
+                  className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
+                >
+                  <MdNavigateBefore className="text-xl" />
+                  Anterior
+                </button>
+                <span className="text-sm text-gray-600 font-medium">
+                  Semana {currentWeekIndex + 1} de {weeks.length}
+                </span>
+                <button
+                  onClick={() => setCurrentWeekIndex((prev) => Math.min(weeks.length - 1, prev + 1))}
+                  disabled={currentWeekIndex >= weeks.length - 1}
+                  className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
+                >
+                  Siguiente
+                  <MdNavigateNext className="text-xl" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Modal de detalle de asistencia */}
+      {selectedDayData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="bg-accent-500 text-white p-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold">
+                  Asistencia del día{' '}
+                  {new Date(selectedDayData.date + 'T00:00:00').toLocaleDateString('es-PE', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p className="text-sm opacity-90">{selectedDayData.courseName}</p>
+              </div>
+              <button
+                onClick={() => setSelectedDayData(null)}
+                className="text-white hover:bg-accent-600 rounded-full p-2 transition-colors"
+              >
+                <MdClose className="text-2xl" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+              <div className="space-y-3">
+                {selectedDayData.attendance.map((student) => (
+                  <div
+                    key={student.studentId}
+                    className="flex items-center justify-between p-4 border-2 rounded-lg hover:bg-gray-50"
+                  >
+                    <span className="font-medium text-gray-800">{student.studentName}</span>
+                    <div className="flex items-center gap-2">
+                      {student.status === 'Presente' && (
+                        <>
+                          <MdCheckCircle className="text-green-600 text-xl" />
+                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                            Presente
+                          </span>
+                        </>
+                      )}
+                      {student.status === 'Ausente' && (
+                        <>
+                          <MdCancel className="text-red-600 text-xl" />
+                          <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                            Ausente
+                          </span>
+                        </>
+                      )}
+                      {student.status === 'Falta justificada' && (
+                        <>
+                          <MdEventNote className="text-orange-600 text-xl" />
+                          <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+                            Falta justificada
+                          </span>
+                        </>
+                      )}
+                      {student.status === 'Tardanza' && (
+                        <>
+                          <MdOutlineAccessTime className="text-yellow-600 text-xl" />
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                            Tardanza
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {session.attendance.map((a) => (
-                      <div
-                        key={a.studentId}
-                        className={`px-3 py-2 rounded text-sm ${
-                          a.status === 'Presente'
-                            ? 'bg-green-100 text-green-800'
-                            : a.status === 'Falta injustificada'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        <span className="font-medium">{a.studentName}</span>
-                        <span className="ml-2 text-xs">({a.status})</span>
-                      </div>
-                    ))}
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {selectedDayData.attendance.filter((a) => a.status === 'Presente').length}
+                    </div>
+                    <div className="text-xs text-gray-600">Presentes</div>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">
+                      {selectedDayData.attendance.filter((a) => a.status === 'Ausente').length}
+                    </div>
+                    <div className="text-xs text-gray-600">Ausentes</div>
+                  </div>
+                  <div className="bg-orange-50 p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {selectedDayData.attendance.filter((a) => a.status === 'Falta justificada').length}
+                    </div>
+                    <div className="text-xs text-gray-600">Justificadas</div>
+                  </div>
+                  <div className="bg-yellow-50 p-3 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {selectedDayData.attendance.filter((a) => a.status === 'Tardanza').length}
+                    </div>
+                    <div className="text-xs text-gray-600">Tardanzas</div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </Layout>

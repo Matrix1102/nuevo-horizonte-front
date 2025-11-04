@@ -1,42 +1,220 @@
 # 🏫 Sistema de Gestión Escolar - Colegio Nuevo Horizonte
 
-Sistema de gestión escolar frontend moderno para el Colegio Nuevo Horizonte, con tres tipos de usuarios: Alumnos, Profesores y Administrativos.
+Sistema de gestión escolar moderno desarrollado con React, TypeScript y Tailwind CSS para el Colegio Nuevo Horizonte. Incluye tres tipos de usuarios: Alumnos, Profesores y Administrativos.
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [Características](#-características-principales)
+- [Requisitos Previos](#-requisitos-previos)
+- [Instalación](#-instalación)
+- [Uso](#-uso)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Tecnologías](#-tecnologías-utilizadas)
+- [Funcionalidades por Usuario](#-funcionalidades-por-tipo-de-usuario)
+- [Paleta de Colores](#-paleta-de-colores-institucional)
+
+---
 
 ## ✨ Características Principales
 
 - ✅ **Sistema de autenticación** con auto-detección de tipo de usuario
+- ✅ **Interfaz moderna** con componentes Headless UI
+- ✅ **Filtros avanzados** con dropdown personalizados
+- ✅ **Vista de asistencias** por días con paginación semanal (lunes-viernes)
+- ✅ **Gestión de calificaciones** con modo edición
+- ✅ **Impresión optimizada** de libretas de notas
 - ✅ **Sidebar colapsable** con iconos Material Design
-- ✅ **Rutas protegidas** según rol de usuario
-- ✅ **Diseño moderno** con glassmorphism y gradientes
-- ✅ **Responsive design** con Tailwind CSS
-- ✅ **Iconos profesionales** de Material Design Icons
+- ✅ **Diseño responsive** con Tailwind CSS
 - ✅ **Sin backend** - Datos simulados en frontend
-- ✅ **Context API** para manejo de estado global
-- ✅ **Transiciones suaves** y animaciones
+- ✅ **TypeScript** para mayor seguridad de tipos
 
-## 🎨 Diseño
+---
 
-### Login Screen
-- Split-screen con imagen de fondo personalizada
-- Efecto glassmorphism en el formulario
-- Degradado de overlay con color institucional
-- Logo en contenedor con backdrop blur
+## 🔧 Requisitos Previos
 
-### Dashboard
-- Interfaz personalizada según tipo de usuario
-- Tarjetas de acceso rápido con iconos MD
-- Color coding por funcionalidad
-- Efectos hover y transiciones
+Antes de comenzar, asegúrate de tener instalado:
+
+- **Node.js** (versión 18 o superior) - [Descargar aquí](https://nodejs.org/)
+- **pnpm** (gestor de paquetes) - [Instalar aquí](https://pnpm.io/installation)
+
+### Verificar instalación:
+
+```bash
+node --version  # Debe mostrar v18.x.x o superior
+pnpm --version  # Debe mostrar 8.x.x o superior
+```
+
+Si no tienes pnpm instalado:
+
+```bash
+npm install -g pnpm
+```
+
+---
+
+## 🚀 Instalación
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Matrix1102/nuevo-horizonte-front.git
+cd nuevo-horizonte-front/nuevo-horizonte-front
+```
+
+### 2. Instalar dependencias
+
+```bash
+pnpm install
+```
+
+Este comando instalará todas las dependencias necesarias:
+- React 19.1.1
+- TypeScript 5.9.3
+- Tailwind CSS 3.4.18
+- Headless UI 2.2.9
+- React Icons
+- React Router DOM
+- Vite (bundler)
+
+### 3. Iniciar el servidor de desarrollo
+
+```bash
+pnpm dev
+```
+
+La aplicación estará disponible en: **http://localhost:5173**
+
+---
+
+## 🎯 Uso
+
+### Acceso al Sistema
+
+1. Abre tu navegador y ve a `http://localhost:5173`
+2. Verás la pantalla de login
+3. Usa uno de los siguientes usuarios de prueba:
+
+#### 👨‍🎓 Alumno
+```
+Email: alumno@colegio.com
+Contraseña: 123456
+```
+
+#### 👨‍🏫 Profesor
+```
+Email: profesor@colegio.com
+Contraseña: 123456
+```
+
+#### 👔 Administrativo
+```
+Email: admin@colegio.com
+Contraseña: 123456
+```
 
 ### Navegación
-- Sidebar colapsable (240px ↔ 64px)
-- Iconos Material Design consistentes
-- Menús dinámicos según rol
-- Header con navegación rápida
 
-### Paleta de Colores Institucional
+- **Sidebar**: Click en el ícono ☰ para expandir/contraer el menú lateral
+- **Menú principal**: Accede a las diferentes secciones según tu rol
+- **Cerrar sesión**: Click en "Cerrar Sesión" en el sidebar
 
-```js
+---
+
+## 📁 Estructura del Proyecto
+
+```
+nuevo-horizonte-front/
+├── src/
+│   ├── components/          # Componentes reutilizables
+│   │   ├── Layout.tsx      # Layout principal con sidebar
+│   │   ├── ProtectedRoute.tsx
+│   │   └── Sidebar.tsx     # Menú lateral
+│   ├── context/            # Context API
+│   │   └── AuthContext.tsx # Contexto de autenticación
+│   ├── pages/              # Páginas de la aplicación
+│   │   ├── Login.tsx       # Página de inicio de sesión
+│   │   ├── Dashboard.tsx   # Dashboard principal
+│   │   ├── Asistencia.tsx  # Vista alumno - Asistencias
+│   │   ├── AsistenciaProfesor.tsx  # Vista profesor - Gestión de asistencias
+│   │   ├── Calificaciones.tsx      # Vista alumno - Calificaciones
+│   │   ├── CalificacionesProfesor.tsx  # Vista profesor - Gestión de notas
+│   │   └── ...             # Otras páginas
+│   ├── App.tsx             # Componente principal
+│   ├── main.tsx            # Punto de entrada
+│   └── index.css           # Estilos globales + Tailwind
+├── public/                 # Recursos estáticos
+├── package.json            # Dependencias del proyecto
+├── tsconfig.json           # Configuración TypeScript
+├── tailwind.config.js      # Configuración Tailwind CSS
+└── vite.config.ts          # Configuración Vite
+
+```
+
+---
+
+## 🛠 Tecnologías Utilizadas
+
+| Tecnología | Versión | Descripción |
+|------------|---------|-------------|
+| React | 19.1.1 | Biblioteca UI |
+| TypeScript | 5.9.3 | Tipado estático |
+| Vite | 6.1.4 | Build tool & dev server |
+| Tailwind CSS | 3.4.18 | Framework CSS |
+| Headless UI | 2.2.9 | Componentes accesibles |
+| React Router | 7.1.1 | Enrutamiento SPA |
+| React Icons | 5.4.0 | Iconos Material Design |
+
+---
+
+## 👥 Funcionalidades por Tipo de Usuario
+
+### 👨‍🎓 Alumno
+
+- **Dashboard**: Vista general con accesos rápidos
+- **Calificaciones**: 
+  - Filtro por período (Bimestre 1-4)
+  - Tabla de notas por curso
+  - Impresión de libreta (solo tabla)
+- **Asistencia**: 
+  - Vista por días (lunes-viernes)
+  - Filtro por mes (Marzo-Diciembre)
+  - Paginación semanal
+  - Estados: Presente, Ausente, Falta justificada, Tardanza
+- **Horario**: Horario semanal de clases
+- **Mis Cursos**: Lista de cursos matriculados
+
+### 👨‍🏫 Profesor
+
+- **Dashboard**: Vista general con accesos rápidos
+- **Asistencia**:
+  - Gestión por curso y fecha
+  - Registro de asistencia diaria
+  - Vista histórica semanal con estadísticas
+  - Modal de detalle por día
+  - Filtros modernos con Headless UI
+- **Calificaciones**:
+  - Gestión por curso
+  - Modo edición con botones "Editar Notas", "Guardar", "Cancelar"
+  - Cálculo automático de promedios
+  - Filtros modernizados
+- **Mis Cursos**: Cursos asignados
+- **Horario**: Horario de clases
+
+### 👔 Administrativo
+
+- **Dashboard**: Vista general administrativa
+- **Usuarios**: Gestión de usuarios del sistema
+- **Cursos**: Administración de cursos
+- **Reportes**: Generación de reportes
+- **Configuración**: Ajustes del sistema
+
+---
+
+## 🎨 Paleta de Colores Institucional
+
+```javascript
 {
   primary: '#0a2342',   // Azul Institucional (Confianza, profesionalismo)
   secondary: '#b8860b', // Dorado Ocre (Excelencia, prestigio)
@@ -46,159 +224,55 @@ Sistema de gestión escolar frontend moderno para el Colegio Nuevo Horizonte, co
 }
 ```
 
-## 👥 Tipos de Usuarios
+### Estados de Asistencia:
+- � **Verde** (`green-500`): Presente
+- 🔴 **Rojo** (`red-500`): Ausente  
+- 🟠 **Naranja** (`orange-500`): Falta justificada
+- 🟡 **Amarillo** (`yellow-500`): Tardanza
 
-### 👨‍🎓 Alumno
-- 📢 Publicaciones
-- ✉️ Mensajería
-- 📝 Calificaciones
-- 💰 Pagos
-- ✅ Asistencia
-- 📋 Matrícula Web
-- 📅 Horario Escolar
+---
 
-### 👨‍🏫 Profesor
-- 📢 Publicaciones
-- 📚 Mis Cursos
-- 📝 Calificaciones
-- ✅ Asistencia
-- 📅 Horario
-- ✉️ Mensajería
-
-### 👨‍💼 Administrativo
-- 📢 Publicaciones
-- 👥 Usuarios
-- 📚 Cursos
-- 💰 Pagos
-- 📊 Reportes
-- ✉️ Mensajería
-
-## 🔐 Credenciales de Prueba
-
-| Tipo | Email | Password |
-|------|-------|----------|
-| **Alumno** | `alumno@colegio.com` | `123456` |
-| **Profesor** | `profesor@colegio.com` | `123456` |
-| **Administrativo** | `admin@colegio.com` | `123456` |
-
-## 📦 Instalación
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/nuevo-horizonte-front.git
-cd nuevo-horizonte-front
-
-# Instalar dependencias (requiere pnpm)
-pnpm install
-
-# Ejecutar en modo desarrollo
-pnpm dev
-
-# Compilar para producción
-pnpm build
-
-# Vista previa de producción
-pnpm preview
-```
-
-## 🛠️ Tecnologías
-
-| Tecnología | Versión | Uso |
-|------------|---------|-----|
-| **React** | 19.1.1 | Framework UI |
-| **TypeScript** | 5.9.3 | Tipado estático |
-| **Vite** | 7.1.12 | Build tool y dev server |
-| **React Router** | 7.9.5 | Navegación y rutas |
-| **Tailwind CSS** | 3.4.18 | Framework de estilos |
-| **React Icons** | latest | Material Design Icons |
-| **PostCSS** | latest | Procesador CSS |
-
-## 📁 Estructura del Proyecto
-
-```
-src/
-├── assets/                 # Recursos estáticos
-│   ├── colegio-logo.png   # Logo institucional
-│   ├── bg-login.jpg       # Background del login
-│   └── login-bg-logo.png  # Logo para login
-│
-├── components/            # Componentes reutilizables
-│   ├── Header.tsx        # Barra superior con navegación
-│   ├── Sidebar.tsx       # Menú lateral colapsable
-│   ├── Layout.tsx        # Layout principal con sidebar
-│   └── ProtectedRoute.tsx # HOC para rutas protegidas
-│
-├── context/              # Context API
-│   ├── AuthContext.tsx   # Autenticación y usuario
-│   └── SidebarContext.tsx # Estado del sidebar
-│
-├── pages/                # Páginas de la aplicación
-│   ├── Login.tsx         # Página de inicio de sesión
-│   ├── Dashboard.tsx     # Dashboard principal
-│   ├── Publicaciones.tsx
-│   ├── Mensajeria.tsx
-│   ├── Calificaciones.tsx
-│   ├── Pagos.tsx
-│   ├── Asistencia.tsx
-│   ├── MatriculaWeb.tsx
-│   ├── HorarioEscolar.tsx
-│   ├── MisCursos.tsx
-│   ├── Horario.tsx
-│   ├── Usuarios.tsx
-│   ├── Cursos.tsx
-│   ├── Reportes.tsx
-│   └── Unauthorized.tsx
-│
-├── App.tsx               # Componente principal con rutas
-├── main.tsx             # Punto de entrada
-└── index.css            # Estilos globales y Tailwind
-```
-
-## � Características Técnicas
-
-### Context API
-- **AuthContext**: Maneja autenticación, login, logout y datos del usuario
-- **SidebarContext**: Controla el estado colapsado/expandido del sidebar
-
-### Routing
-- Rutas públicas: `/login`
-- Rutas protegidas: Requieren autenticación
-- Redirección automática según estado de autenticación
-- Página de no autorizado para accesos inválidos
-
-### Persistencia
-- `localStorage` para mantener sesión activa
-- Auto-login al recargar página si hay sesión válida
-
-### Responsividad
-- Mobile-first approach
-- Breakpoints: `sm`, `md`, `lg`, `xl`, `2xl`
-- Sidebar oculto en mobile (<1024px)
-- Layout adaptable según tamaño de pantalla
-
-## 📝 Notas de Desarrollo
-
-- Los datos de usuarios están simulados en `AuthContext.tsx`
-- La autenticación NO requiere backend
-- Puedes agregar más usuarios en el array `mockUsers`
-- Todas las páginas usan el componente `Layout` para consistencia
-- Los estilos usan clases de Tailwind (sin CSS separado excepto `index.css`)
-
-## 🚀 Scripts Disponibles
+## 📝 Scripts Disponibles
 
 ```bash
 pnpm dev          # Inicia servidor de desarrollo
 pnpm build        # Compila para producción
-pnpm preview      # Vista previa de build de producción
+pnpm preview      # Preview de build de producción
 pnpm lint         # Ejecuta ESLint
 ```
 
-## 📄 Licencia
+---
 
-Proyecto educativo para el Colegio Nuevo Horizonte (Ficticio).
+## 🐛 Solución de Problemas
 
-## 🌟 Créditos
+### El servidor no inicia
+```bash
+# Limpia caché y reinstala dependencias
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+pnpm dev
+```
 
-Proyecto académico 2025 – Facultad de Ingeniería de Sistemas e Informática
-Universidad Nacional Mayor de San Marcos 🇵🇪
+### Errores de TypeScript
+```bash
+# Verifica la configuración
+pnpm tsc --noEmit
+```
+
+### Problemas de estilos
+```bash
+# Reconstruye Tailwind CSS
+pnpm build
+```
+
+---
+
+## � Licencia
+
+Proyecto educativo para el Colegio Nuevo Horizonte.
+
+---
+
+**¡Gracias por usar el Sistema de Gestión Escolar Nuevo Horizonte!** 🎓
 

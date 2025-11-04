@@ -11,3 +11,53 @@
     @apply min-h-screen;
   }
 }
+
+/* Estilos para impresión */
+@media print {
+  /* Ocultar todo excepto el contenido de impresión */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostrar solo la tabla de calificaciones */
+  .print-content,
+  .print-content * {
+    visibility: visible;
+  }
+  
+  .print-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Ocultar elementos de navegación y controles */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ajustar tabla para impresión */
+  .print-content table {
+    page-break-inside: avoid;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  /* Asegurar que los bordes se vean en impresión */
+  .print-content table,
+  .print-content th,
+  .print-content td {
+    border: 1px solid #000 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  /* Mantener colores de fondo en impresión */
+  .print-content thead tr {
+    background-color: #f9fafb !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
