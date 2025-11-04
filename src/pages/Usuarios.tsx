@@ -17,7 +17,7 @@ export function Usuarios() {
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500">
-        <h3 className="text-lg font-semibold mb-4 text-primary-500">Listado de Usuarios (Simulado)</h3>
+        <h3 className="text-lg font-semibold mb-4 text-primary-500">Listado de Usuarios </h3>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
