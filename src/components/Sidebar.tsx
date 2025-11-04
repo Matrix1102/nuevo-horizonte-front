@@ -35,8 +35,8 @@ export function Sidebar() {
   const profesorMenuItems = [
     { path: '/publicaciones', label: 'Publicaciones', icon: <MdCampaign /> },
     { path: '/mis-cursos', label: 'Mis Cursos', icon: <MdClass /> },
-    { path: '/calificaciones', label: 'Calificaciones', icon: <MdGrade /> },
-    { path: '/asistencia', label: 'Asistencia', icon: <MdCheckCircle /> },
+    { path: '/calificaciones-profesor', label: 'Calificaciones', icon: <MdGrade /> }, // CAMBIADO
+    { path: '/asistencia-profesor', label: 'Asistencia', icon: <MdCheckCircle /> }, // CAMBIADO
     { path: '/horario', label: 'Horario', icon: <MdSchedule /> },
     { path: '/mensajeria', label: 'Mensajería', icon: <MdMessage /> }
   ];

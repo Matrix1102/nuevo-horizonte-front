@@ -6,8 +6,10 @@ import { Dashboard } from './pages/Dashboard';
 import { Publicaciones } from './pages/Publicaciones';
 import { Mensajeria } from './pages/Mensajeria';
 import { Calificaciones } from './pages/Calificaciones';
+import { CalificacionesProfesor } from './pages/CalificacionesProfesor';
 import { Pagos } from './pages/Pagos';
 import { Asistencia } from './pages/Asistencia';
+import { AsistenciaProfesor } from './pages/AsistenciaProfesor';
 import { MatriculaWeb } from './pages/MatriculaWeb';
 import { HorarioEscolar } from './pages/HorarioEscolar';
 import { MisCursos } from './pages/MisCursos';
@@ -53,11 +55,21 @@ function App() {
             }
           />
           
+          {/* Rutas de Calificaciones */}
           <Route
             path="/calificaciones"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedTypes={['alumno']}>
                 <Calificaciones />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/calificaciones-profesor"
+            element={
+              <ProtectedRoute allowedTypes={['profesor']}>
+                <CalificacionesProfesor />
               </ProtectedRoute>
             }
           />
@@ -71,11 +83,21 @@ function App() {
             }
           />
           
+          {/* Rutas de Asistencia */}
           <Route
             path="/asistencia"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedTypes={['alumno']}>
                 <Asistencia />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/asistencia-profesor"
+            element={
+              <ProtectedRoute allowedTypes={['profesor']}>
+                <AsistenciaProfesor />
               </ProtectedRoute>
             }
           />
