@@ -197,3 +197,8 @@ pnpm lint         # Ejecuta ESLint
 
 Proyecto educativo para el Colegio Nuevo Horizonte (Ficticio).
 
+## 🌟 Créditos
+
+Proyecto académico 2025 – Facultad de Ingeniería de Sistemas e Informática
+Universidad Nacional Mayor de San Marcos 🇵🇪
+
