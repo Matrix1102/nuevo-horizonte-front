@@ -18,6 +18,7 @@ import { Usuarios } from './pages/Usuarios';
 import { Cursos } from './pages/Cursos';
 import { Reportes } from './pages/Reportes';
 import { Unauthorized } from './pages/Unauthorized';
+import MiPerfil from './pages/MiPerfil';
 import './App.css';
 
 function App() {
@@ -33,6 +34,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/mi-perfil"
+            element={
+              <ProtectedRoute>
+                <MiPerfil />
               </ProtectedRoute>
             }
           />

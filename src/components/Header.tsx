@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { MdMenu, MdHome, MdNotifications, MdSettings, MdLogout } from 'react-icons/md';
+import { MdMenu, MdHome, MdNotifications, MdPerson, MdLogout } from 'react-icons/md';
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -48,20 +48,21 @@ export function Header() {
             {user?.name} ▼
           </button>
           <div className="absolute top-full right-0 mt-2.5 bg-white rounded-lg shadow-lg p-2 min-w-[200px] opacity-0 invisible transition-all group-hover:opacity-100 group-hover:visible border border-soft-300">
-            <button 
-              onClick={handleLogout}
-              className="w-full bg-none border-none px-4 py-3 text-left cursor-pointer rounded-md text-red-600 font-semibold transition-colors hover:bg-red-50 flex items-center gap-2"
+            <Link
+              to="/mi-perfil"
+              className="w-full bg-none border-none px-4 py-3 text-left cursor-pointer rounded-md text-primary-600 font-semibold transition-colors hover:bg-primary-50 flex items-center gap-2 no-underline"
             >
-              <MdLogout /> Cerrar Sesión
-            </button>
+              <MdPerson /> Mi Perfil
+            </Link>
           </div>
         </div>
 
         <button 
-          className="bg-none border-none text-2xl cursor-pointer p-2 rounded-lg transition-colors hover:bg-soft-200 text-primary-500"
-          title="Configuración"
+          onClick={handleLogout}
+          className="bg-none border-none text-2xl cursor-pointer p-2 rounded-lg transition-colors hover:bg-red-50 text-red-600"
+          title="Cerrar Sesión"
         >
-          <MdSettings />
+          <MdLogout />
         </button>
       </div>
     </header>
