@@ -1,8 +1,13 @@
-import { useMemo, useState } from 'react';
+// src/pages/AsistenciaProfesor.tsx - CORREGIDO CON DATOS REALES
+
+import { useMemo, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { MdCheckCircle, MdSave, MdCalendarToday, MdClose, MdExpandMore, MdCheck, MdCancel, MdEventNote, MdOutlineAccessTime, MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { useCourses } from '../context/CoursesContext';
+import { useAuth } from '../context/AuthContext';
 
 type AttendanceStatus = 'Presente' | 'Ausente' | 'Falta justificada' | 'Tardanza';
 
@@ -19,74 +24,11 @@ type DayAttendance = {
   attendance: StudentAttendance[];
 };
 
-// Datos simulados
-const simulatedStudents = [
-  { studentId: 's1', studentName: 'Ana García' },
-  { studentId: 's2', studentName: 'Carlos Pérez' },
-  { studentId: 's3', studentName: 'María López' },
-  { studentId: 's4', studentName: 'José Bayona' },
-  { studentId: 's5', studentName: 'Laura Díaz' },
-];
-
-const courses = [
-  {
-    courseId: 'c1',
-    courseName: 'Matemáticas - 3° A',
-    students: simulatedStudents,
-  },
-  {
-    courseId: 'c2',
-    courseName: 'Comunicación - 3° B',
-    students: simulatedStudents,
-  },
-];
-
-// Generar datos de asistencia por días (solo días de semana)
-function generateAttendanceData(courseId: string, courseName: string): DayAttendance[] {
-  const data: DayAttendance[] = [];
-  const startDate = new Date('2025-03-01');
-  const endDate = new Date('2025-06-30');
-
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-    
-    // Usar la fecha en formato local para verificar el día de la semana
-    const localDate = new Date(year, d.getMonth(), d.getDate());
-    const dayOfWeek = localDate.getDay();
-    
-    if (dayOfWeek === 0 || dayOfWeek === 6) continue; // Skip weekends
-
-    const attendance: StudentAttendance[] = simulatedStudents.map((student) => {
-      const rand = Math.random();
-      let status: AttendanceStatus;
-      if (rand < 0.75) status = 'Presente';
-      else if (rand < 0.83) status = 'Ausente';
-      else if (rand < 0.90) status = 'Falta justificada';
-      else status = 'Tardanza';
-
-      return {
-        studentId: student.studentId,
-        studentName: student.studentName,
-        status,
-      };
-    });
-
-    data.push({
-      date: dateStr,
-      courseId,
-      courseName,
-      attendance,
-    });
-  }
-
-  return data; // Mantener orden ascendente (más antiguos primero)
-}
-
 export function AsistenciaProfesor() {
-  const [selectedCourse, setSelectedCourse] = useState<string>(courses[0].courseId);
+  const { courses, attendance, saveAttendance } = useCourses();
+  const { user } = useAuth();
+  const location = useLocation();
+  const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<number>(10); // Noviembre (mes actual)
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -107,27 +49,59 @@ export function AsistenciaProfesor() {
     { value: 11, label: 'Diciembre' },
   ];
 
+  // Filtrar cursos del profesor actual
+  const myCourses = useMemo(() => {
+    return courses.filter(course => course.teacherId === user?.id);
+  }, [courses, user]);
+
+  // Seleccionar curso inicial (desde navegación o primer curso)
+  useEffect(() => {
+    const courseIdFromNav = (location.state as any)?.courseId;
+    if (courseIdFromNav && myCourses.find(c => c.id === courseIdFromNav)) {
+      setSelectedCourse(courseIdFromNav);
+    } else if (myCourses.length > 0 && !selectedCourse) {
+      setSelectedCourse(myCourses[0].id);
+    }
+  }, [myCourses, location.state, selectedCourse]);
+
   const currentCourse = useMemo(
-    () => courses.find((c) => c.courseId === selectedCourse),
-    [selectedCourse]
+    () => myCourses.find((c) => c.id === selectedCourse),
+    [myCourses, selectedCourse]
   );
 
-  // Generate attendance data for selected course
-  const allAttendanceData = useMemo(() => {
+  // Obtener asistencias del curso actual desde el contexto
+  const courseAttendance = useMemo(() => {
     if (!currentCourse) return [];
-    return generateAttendanceData(currentCourse.courseId, currentCourse.courseName);
-  }, [currentCourse]);
+    
+    // Filtrar asistencias del curso seleccionado
+    const courseAttendanceData = attendance.filter(a => a.courseId === selectedCourse);
+    
+    // Convertir al formato esperado
+    return courseAttendanceData.map(a => ({
+      date: a.date,
+      courseId: a.courseId,
+      courseName: currentCourse.name,
+      attendance: a.attendance.map(record => {
+        const student = currentCourse.students.find(s => s.id === record.studentId);
+        return {
+          studentId: record.studentId,
+          studentName: student?.name || 'Desconocido',
+          status: record.status,
+        };
+      }),
+    }));
+  }, [attendance, selectedCourse, currentCourse]);
 
   // Filter by selected month
   const monthFilteredData = useMemo(() => {
-    return allAttendanceData.filter((day) => {
+    return courseAttendance.filter((day) => {
       const date = new Date(day.date + 'T00:00:00');
       const dayOfWeek = date.getDay();
       // Excluir fines de semana (0 = Domingo, 6 = Sábado)
       if (dayOfWeek === 0 || dayOfWeek === 6) return false;
       return date.getMonth() === selectedMonth;
     });
-  }, [allAttendanceData, selectedMonth]);
+  }, [courseAttendance, selectedMonth]);
 
   // Group into weeks (Mon-Fri)
   const weeks = useMemo(() => {
@@ -167,7 +141,7 @@ export function AsistenciaProfesor() {
   function startRecording() {
     if (!currentCourse) return;
     
-    const existing = allAttendanceData.find(
+    const existing = courseAttendance.find(
       (d) => d.courseId === selectedCourse && d.date === selectedDate
     );
 
@@ -176,8 +150,8 @@ export function AsistenciaProfesor() {
     } else {
       setCurrentAttendance(
         currentCourse.students.map((s) => ({
-          studentId: s.studentId,
-          studentName: s.studentName,
+          studentId: s.id,
+          studentName: s.name,
           status: 'Presente' as AttendanceStatus,
         }))
       );
@@ -191,8 +165,20 @@ export function AsistenciaProfesor() {
     );
   }
 
-  function saveAttendance() {
+  function saveAttendanceData() {
     if (!currentCourse) return;
+    
+    const attendanceRecords = currentAttendance.map(a => ({
+      studentId: a.studentId,
+      status: a.status,
+    }));
+
+    saveAttendance({
+      date: selectedDate,
+      courseId: selectedCourse,
+      attendance: attendanceRecords,
+    });
+
     setIsRecording(false);
     setCurrentAttendance([]);
     alert('Asistencia guardada correctamente');
@@ -210,6 +196,24 @@ export function AsistenciaProfesor() {
     Tardanza: 'border-yellow-500',
   };
 
+  if (myCourses.length === 0) {
+    return (
+      <Layout>
+        <div className="flex items-center gap-3 mb-5">
+          <span className="text-3xl text-accent-500">
+            <MdCheckCircle />
+          </span>
+          <h2 className="text-primary-500 text-2xl font-bold">Asistencia - Profesor</h2>
+        </div>
+        <div className="bg-white p-8 rounded-xl shadow-md border-l-4 border-accent-500 text-center">
+          <MdCheckCircle className="text-6xl mx-auto mb-4 text-gray-300" />
+          <p className="text-gray-500">No tienes cursos asignados</p>
+          <p className="text-sm text-gray-400">Contacta con administración para que te asignen cursos</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="flex items-center gap-3 mb-5">
@@ -223,7 +227,7 @@ export function AsistenciaProfesor() {
       <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500 mb-6">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium">Curso:</label>
+            <label className="text-sm font-medium text-primary-500">Curso:</label>
             <Listbox
               value={selectedCourse}
               onChange={(val) => {
@@ -233,12 +237,12 @@ export function AsistenciaProfesor() {
               disabled={isRecording}
             >
               <div className="relative">
-                <Listbox.Button className="relative w-48 cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left text-sm border border-gray-300 hover:border-accent-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span className="block truncate">
-                    {courses.find((c) => c.courseId === selectedCourse)?.courseName || 'Seleccionar'}
+                <Listbox.Button className="relative w-64 cursor-pointer rounded-lg bg-white py-2.5 pl-4 pr-10 text-left shadow-sm border-2 border-gray-200 hover:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span className="block truncate text-sm font-medium text-gray-700">
+                    {currentCourse ? `${currentCourse.name} - ${currentCourse.level} ${currentCourse.section}` : 'Seleccionar'}
                   </span>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <MdExpandMore className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    <MdExpandMore className="h-5 w-5 text-accent-500" aria-hidden="true" />
                   </span>
                 </Listbox.Button>
                 <Transition
@@ -247,21 +251,21 @@ export function AsistenciaProfesor() {
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
-                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-48 overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    {courses.map((course) => (
+                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-64 overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {myCourses.map((course) => (
                       <Listbox.Option
-                        key={course.courseId}
-                        value={course.courseId}
+                        key={course.id}
+                        value={course.id}
                         className={({ active }) =>
-                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
-                            active ? 'bg-accent-100 text-accent-900' : 'text-gray-900'
+                          `relative cursor-pointer select-none py-2.5 pl-10 pr-4 ${
+                            active ? 'bg-accent-50 text-accent-900' : 'text-gray-900'
                           }`
                         }
                       >
                         {({ selected }) => (
                           <>
-                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                              {course.courseName}
+                            <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                              {course.name} - {course.level} {course.section}
                             </span>
                             {selected ? (
                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-accent-600">
@@ -279,7 +283,7 @@ export function AsistenciaProfesor() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium">Mes:</label>
+            <label className="text-sm font-medium text-primary-500">Mes:</label>
             <Listbox
               value={selectedMonth}
               onChange={(val) => {
@@ -288,12 +292,12 @@ export function AsistenciaProfesor() {
               }}
             >
               <div className="relative">
-                <Listbox.Button className="relative w-40 cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left text-sm border border-gray-300 hover:border-accent-500 transition-colors">
-                  <span className="block truncate">
+                <Listbox.Button className="relative w-40 cursor-pointer rounded-lg bg-white py-2.5 pl-4 pr-10 text-left shadow-sm border-2 border-gray-200 hover:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-500 transition-all">
+                  <span className="block truncate text-sm font-medium text-gray-700">
                     {months.find((m) => m.value === selectedMonth)?.label || 'Seleccionar'}
                   </span>
                   <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <MdExpandMore className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    <MdExpandMore className="h-5 w-5 text-accent-500" aria-hidden="true" />
                   </span>
                 </Listbox.Button>
                 <Transition
@@ -302,20 +306,20 @@ export function AsistenciaProfesor() {
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
-                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-40 overflow-auto rounded-lg bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-40 overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                     {months.map((month) => (
                       <Listbox.Option
                         key={month.value}
                         value={month.value}
                         className={({ active }) =>
-                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
-                            active ? 'bg-accent-100 text-accent-900' : 'text-gray-900'
+                          `relative cursor-pointer select-none py-2.5 pl-10 pr-4 ${
+                            active ? 'bg-accent-50 text-accent-900' : 'text-gray-900'
                           }`
                         }
                       >
                         {({ selected }) => (
                           <>
-                            <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                            <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
                               {month.label}
                             </span>
                             {selected ? (
@@ -335,16 +339,16 @@ export function AsistenciaProfesor() {
 
           {!isRecording && (
             <div className="flex items-center gap-3 md:ml-auto">
-              <label className="text-sm font-medium">Fecha:</label>
+              <label className="text-sm font-medium text-primary-500">Fecha:</label>
               <input
                 type="date"
-                className="form-input px-3 py-2 rounded-lg border border-gray-300 hover:border-accent-500 transition-colors text-sm"
+                className="px-4 py-2.5 rounded-lg border-2 border-gray-200 hover:border-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-500 transition-all text-sm font-medium text-gray-700"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
               <button
                 onClick={startRecording}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600 transition-colors shadow-sm hover:shadow-md"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent-500 text-white font-medium hover:bg-accent-600 transition-colors shadow-sm hover:shadow-md"
               >
                 <MdCalendarToday /> Tomar Asistencia
               </button>
@@ -355,14 +359,14 @@ export function AsistenciaProfesor() {
         {isRecording && (
           <div className="border-t mt-6 pt-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-3">Lista de Alumnos</h3>
+              <h3 className="text-lg font-semibold mb-3 text-primary-500">Lista de Alumnos</h3>
               <div className="space-y-3">
                 {currentAttendance.map((student) => (
                   <div
                     key={student.studentId}
-                    className="flex items-center justify-between p-4 border rounded hover:bg-gray-50"
+                    className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <span className="font-medium">{student.studentName}</span>
+                    <span className="font-medium text-gray-800">{student.studentName}</span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => updateStatus(student.studentId, 'Presente')}
@@ -413,13 +417,13 @@ export function AsistenciaProfesor() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={cancelRecording}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm"
               >
                 <MdClose /> Cancelar
               </button>
               <button
-                onClick={saveAttendance}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors shadow-sm hover:shadow-md"
+                onClick={saveAttendanceData}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600 transition-colors shadow-sm hover:shadow-md"
               >
                 <MdSave /> Guardar Asistencia
               </button>
@@ -434,19 +438,19 @@ export function AsistenciaProfesor() {
           <div className="flex flex-wrap gap-4 items-center justify-center">
             <div className="flex items-center gap-2">
               <MdCheckCircle className="text-green-600 text-xl" />
-              <span className="text-sm">Presente</span>
+              <span className="text-sm font-medium text-gray-700">Presente</span>
             </div>
             <div className="flex items-center gap-2">
               <MdCancel className="text-red-600 text-xl" />
-              <span className="text-sm">Ausente</span>
+              <span className="text-sm font-medium text-gray-700">Ausente</span>
             </div>
             <div className="flex items-center gap-2">
               <MdEventNote className="text-orange-600 text-xl" />
-              <span className="text-sm">Falta justificada</span>
+              <span className="text-sm font-medium text-gray-700">Falta justificada</span>
             </div>
             <div className="flex items-center gap-2">
               <MdOutlineAccessTime className="text-yellow-600 text-xl" />
-              <span className="text-sm">Tardanza</span>
+              <span className="text-sm font-medium text-gray-700">Tardanza</span>
             </div>
           </div>
         </div>
@@ -455,7 +459,7 @@ export function AsistenciaProfesor() {
       {/* Attendance by Days */}
       {!isRecording && (
         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500">
-          <h3 className="text-lg font-semibold mb-4">Historial de Asistencia</h3>
+          <h3 className="text-lg font-semibold mb-4 text-primary-500">Historial de Asistencia</h3>
 
           {currentWeek.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
@@ -571,7 +575,7 @@ export function AsistenciaProfesor() {
                 <button
                   onClick={() => setCurrentWeekIndex((prev) => Math.max(0, prev - 1))}
                   disabled={currentWeekIndex === 0}
-                  className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
+                  className="flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-gray-300 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
                 >
                   <MdNavigateBefore className="text-xl" />
                   Anterior
@@ -582,7 +586,7 @@ export function AsistenciaProfesor() {
                 <button
                   onClick={() => setCurrentWeekIndex((prev) => Math.min(weeks.length - 1, prev + 1))}
                   disabled={currentWeekIndex >= weeks.length - 1}
-                  className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
+                  className="flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-gray-300 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-accent-500 transition-colors shadow-sm"
                 >
                   Siguiente
                   <MdNavigateNext className="text-xl" />
@@ -639,65 +643,62 @@ export function AsistenciaProfesor() {
                         <>
                           <MdCancel className="text-red-600 text-xl" />
                           <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                            Ausente
-                          </span>
-                        </>
-                      )}
-                      {student.status === 'Falta justificada' && (
-                        <>
-                          <MdEventNote className="text-orange-600 text-xl" />
-                          <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
-                            Falta justificada
-                          </span>
-                        </>
-                      )}
-                      {student.status === 'Tardanza' && (
-                        <>
-                          <MdOutlineAccessTime className="text-yellow-600 text-xl" />
-                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                            Tardanza
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {selectedDayData.attendance.filter((a) => a.status === 'Presente').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Presentes</div>
-                  </div>
-                  <div className="bg-red-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">
-                      {selectedDayData.attendance.filter((a) => a.status === 'Ausente').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Ausentes</div>
-                  </div>
-                  <div className="bg-orange-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">
-                      {selectedDayData.attendance.filter((a) => a.status === 'Falta justificada').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Justificadas</div>
-                  </div>
-                  <div className="bg-yellow-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">
-                      {selectedDayData.attendance.filter((a) => a.status === 'Tardanza').length}
-                    </div>
-                    <div className="text-xs text-gray-600">Tardanzas</div>
-                  </div>
+Ausente
+</span>
+</>
+)}
+{student.status === 'Falta justificada' && (
+<>
+<MdEventNote className="text-orange-600 text-xl" />
+<span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+Falta justificada
+</span>
+</>
+)}
+{student.status === 'Tardanza' && (
+<>
+<MdOutlineAccessTime className="text-yellow-600 text-xl" />
+<span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+Tardanza
+</span>
+</>
+)}
+</div>
+</div>
+))}
+</div>
+<div className="mt-6 pt-6 border-t">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="bg-green-50 p-3 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">
+                  {selectedDayData.attendance.filter((a) => a.status === 'Presente').length}
                 </div>
+                <div className="text-xs text-gray-600">Presentes</div>
+              </div>
+              <div className="bg-red-50 p-3 rounded-lg">
+                <div className="text-2xl font-bold text-red-600">
+                  {selectedDayData.attendance.filter((a) => a.status === 'Ausente').length}
+                </div>
+                <div className="text-xs text-gray-600">Ausentes</div>
+              </div>
+              <div className="bg-orange-50 p-3 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">
+                  {selectedDayData.attendance.filter((a) => a.status === 'Falta justificada').length}
+                </div>
+                <div className="text-xs text-gray-600">Justificadas</div>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {selectedDayData.attendance.filter((a) => a.status === 'Tardanza').length}
+                </div>
+                <div className="text-xs text-gray-600">Tardanzas</div>
               </div>
             </div>
           </div>
         </div>
-      )}
-    </Layout>
-  );
+      </div>
+    </div>
+  )}
+</Layout>);
 }
-
 export default AsistenciaProfesor;
