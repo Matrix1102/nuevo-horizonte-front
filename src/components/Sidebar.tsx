@@ -28,6 +28,7 @@ export function Sidebar() {
     { path: '/calificaciones', label: 'Calificaciones', icon: <MdGrade /> },
     { path: '/pagos', label: 'Pagos', icon: <MdPayment /> },
     { path: '/asistencia', label: 'Asistencia', icon: <MdCheckCircle /> },
+    { path: '/mis-cursos', label: 'Mis Cursos', icon: <MdClass /> },
     { path: '/matricula-web', label: 'Matrícula Web', icon: <MdAppRegistration /> },
     { path: '/horario-escolar', label: 'Horario Escolar', icon: <MdSchedule /> }
   ];

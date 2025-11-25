@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Layout } from '../components/Layout';
 import { MdSchedule } from 'react-icons/md';
+import { getCursoColor } from '../data/cursos';
 
 type Slot = {
   subject: string;
@@ -13,66 +14,66 @@ type Timetable = Record<string, (Slot | null)[]>; // day -> 8 slots
 const simulatedTimetable: Record<string, Timetable> = {
   'Salón A': {
     Lunes: [
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Educ. Física', teacher: 'Profe. Soto' },
-      { subject: 'Tutoría', teacher: 'Profa. Rivera' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Educ. Física', teacher: 'Profesor Soto' },
+      { subject: 'Tutoría', teacher: 'Profesora Rivera' },
     ],
     Martes: [
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
     ],
     Miércoles: [
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Educ. Física', teacher: 'Profe. Soto' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Tutoría', teacher: 'Profa. Rivera' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Educ. Física', teacher: 'Profesor Soto' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Tutoría', teacher: 'Profesora Rivera' },
     ],
     Jueves: [
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Educ. Física', teacher: 'Profe. Soto' },
-      { subject: 'Proyecto', teacher: 'Profa. Lee' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Educ. Física', teacher: 'Profesor Soto' },
+      { subject: 'Proyecto', teacher: 'Profesora Lee' },
     ],
     Viernes: [
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
       { subject: 'Cierre de semana', teacher: 'Coordinador' },
     ],
   },
   'Salón B': {
     Lunes: [
-      { subject: 'Comunicación', teacher: 'Profa. Torres' },
-      { subject: 'Matemáticas', teacher: 'Profa. Rivera' },
-      { subject: 'Inglés', teacher: 'Profa. Lee' },
-      { subject: 'Ciencias', teacher: 'Profe. Gómez' },
-      { subject: 'Historia', teacher: 'Profa. Ruiz' },
-      { subject: 'Arte', teacher: 'Profa. Díaz' },
-      { subject: 'Educ. Física', teacher: 'Profe. Soto' },
-      { subject: 'Proyecto', teacher: 'Profa. Lee' },
+      { subject: 'Comunicación', teacher: 'Profesora Torres' },
+      { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+      { subject: 'Inglés', teacher: 'Profesora Lee' },
+      { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+      { subject: 'Historia', teacher: 'Profesora Ruiz' },
+      { subject: 'Arte', teacher: 'Profesora Díaz' },
+      { subject: 'Educ. Física', teacher: 'Profesor Soto' },
+      { subject: 'Proyecto', teacher: 'Profesora Lee' },
     ],
     Martes: [null, null, null, null, null, null, null, null],
     Miércoles: [null, null, null, null, null, null, null, null],
@@ -118,11 +119,12 @@ export function HorarioEscolar() {
                   <td className="border p-3 font-medium">Hora {idx + 1}</td>
                   {days.map((d) => {
                     const slot = timetable[d][idx];
+                    const cursoColor = slot ? getCursoColor(slot.subject) : 'gray';
                     return (
                       <td key={d} className="border p-3 align-top">
                         {slot ? (
-                          <div className="p-3 rounded-lg bg-blue-50">
-                            <div className="font-semibold">{slot.subject}</div>
+                          <div className={`p-3 rounded-lg bg-${cursoColor}-50 border-l-4 border-${cursoColor}-500`}>
+                            <div className="font-semibold text-gray-800">{slot.subject}</div>
                             <div className="text-sm text-gray-600">{slot.teacher}</div>
                           </div>
                         ) : (

@@ -3,6 +3,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CoursesProvider } from './context/CoursesContext';
+import { PublicationsProvider } from './context/PublicationsContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -29,6 +30,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <CoursesProvider>
+          <PublicationsProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
@@ -137,7 +139,7 @@ function App() {
             <Route
               path="/mis-cursos"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedTypes={['alumno', 'profesor']}>
                   <MisCursos />
                 </ProtectedRoute>
               }
@@ -182,6 +184,7 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+          </PublicationsProvider>
         </CoursesProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -22,15 +22,17 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {user?.type === 'alumno' && (
           <>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-accent-500"><MdClass /></span>
-                <h3 className="text-primary-500 text-xl font-semibold">Mis Materias</h3>
+            <Link to="/mis-cursos" className="no-underline block h-full">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl text-accent-500"><MdClass /></span>
+                  <h3 className="text-primary-500 text-xl font-semibold">Mis Cursos</h3>
+                </div>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  Accede a tus cursos y materiales de estudio
+                </p>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Accede a tus cursos y materiales de estudio
-              </p>
-            </div>
+            </Link>
 
             <Link to="/calificaciones" className="no-underline block h-full">
               <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500 h-full">

@@ -19,7 +19,7 @@ export function MisCursos() {
 
   return (
     <Layout>
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-3 mb-6">
         <span className="text-3xl text-accent-500"><MdClass /></span>
         <h2 className="text-primary-500 text-2xl font-bold">Mis Cursos</h2>
       </div>
