@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
+import { useMessaging } from '../hooks/useMessaging';
+import type { Message } from '../context/MessagingContext';
 import {
   MdMessage,
   MdCreate,
@@ -13,57 +16,9 @@ import {
 
 type Folder = 'recibidos' | 'enviados' | 'borradores' | 'papelera';
 
-type Message = {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  body: string;
-  date: string; // ISO
-  folder: Folder;
-};
-
-const simulatedMessages: Message[] = [
-  {
-    id: 'm1',
-    from: 'Colegio Nuevo Horizonte',
-    to: 'Jose Bayona',
-    subject: 'Justificación',
-    body: 'Adjuntamos la justificación solicitada... ',
-    date: '2025-06-02T09:30:00',
-    folder: 'recibidos',
-  },
-  {
-    id: 'm2',
-    from: 'Dirección',
-    to: 'Padres de Familia',
-    subject: 'Comunicado para padres',
-    body: 'Estimados padres, informamos que... ',
-    date: '2025-05-25T11:00:00',
-    folder: 'recibidos',
-  },
-  {
-    id: 'm3',
-    from: 'Jose Bayona',
-    to: 'Profesor(a)',
-    subject: 'Consulta sobre tarea',
-    body: 'Buen día, quisiera consultar... ',
-    date: '2025-05-20T08:20:00',
-    folder: 'enviados',
-  },
-  {
-    id: 'm4',
-    from: 'Jose Bayona',
-    to: 'Secretaría',
-    subject: 'Borrador: permiso',
-    body: 'Borrador de solicitud de permiso... ',
-    date: '2025-05-18T14:00:00',
-    folder: 'borradores',
-  },
-];
-
 export function Mensajeria() {
-  const [messages, setMessages] = useState<Message[]>(simulatedMessages);
+  const { user } = useAuth();
+  const { messages, setMessages, markAsRead, addMessage } = useMessaging();
   const [activeFolder, setActiveFolder] = useState<Folder>('recibidos');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [to, setTo] = useState('');
@@ -81,7 +36,26 @@ export function Mensajeria() {
     []
   );
 
-  const visible = messages.filter((m) => m.folder === activeFolder);
+  const visible = messages.filter((m) => {
+    if (m.folder !== activeFolder) return false;
+    
+    // Filtrar por usuario según la carpeta
+    if (activeFolder === 'recibidos') {
+      return m.to === user?.name;
+    } else if (activeFolder === 'enviados') {
+      return m.from === user?.name;
+    } else if (activeFolder === 'borradores' || activeFolder === 'papelera') {
+      return m.from === user?.name;
+    }
+    
+    return true;
+  });
+
+  useEffect(() => {
+    if (selectedMessage && selectedMessage.folder === 'recibidos' && !selectedMessage.read) {
+      markAsRead(selectedMessage.id);
+    }
+  }, [selectedMessage, markAsRead]);
 
   function openCreate() {
     setTo('');
@@ -91,16 +65,14 @@ export function Mensajeria() {
   }
 
   function sendMessage() {
-    const newMsg: Message = {
-      id: `m${Date.now()}`,
-      from: 'Jose Bayona',
+    addMessage({
+      from: user?.name || 'Usuario',
       to: to || 'Destinatario',
       subject: subject || '(sin asunto)',
       body: body || '',
       date: new Date().toISOString(),
       folder: 'enviados',
-    };
-    setMessages((s) => [newMsg, ...s]);
+    });
     setIsModalOpen(false);
   }
 
@@ -153,12 +125,15 @@ export function Mensajeria() {
                     tabIndex={0}
                     onClick={() => setSelectedMessage(m)}
                     onKeyDown={(e) => e.key === 'Enter' && setSelectedMessage(m)}
-                    className="flex items-center gap-4 border-b pb-4 cursor-pointer hover:bg-gray-50"
+                    className={`flex items-center gap-4 border-b pb-4 cursor-pointer hover:bg-gray-50 ${!m.read && m.folder === 'recibidos' ? 'bg-blue-50' : ''}`}
                   >
                     <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-xl">✉️</div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <div className="font-semibold">{m.subject}</div>
+                        <div className={`${!m.read && m.folder === 'recibidos' ? 'font-bold' : 'font-semibold'}`}>
+                          {!m.read && m.folder === 'recibidos' && <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>}
+                          {m.subject}
+                        </div>
                         <div className="text-sm text-gray-500">{new Date(m.date).toLocaleDateString('es-PE')}</div>
                       </div>
                       <div className="text-sm text-gray-600">{m.from} — {m.body}</div>

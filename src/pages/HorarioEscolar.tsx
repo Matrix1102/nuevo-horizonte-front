@@ -26,57 +26,57 @@ const courseColors: Record<string, { bg: string; border: string; text: string }>
 
 const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-// Horario semanal fijo para 5to Primaria Sección A
+// Horario semanal fijo para 5to Primaria Sección A (8 horas de 45 min c/u)
 const weeklySchedule: Timetable = {
   Lunes: [
     { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+    { subject: 'Comunicación', teacher: 'Profesora Torres' },
     { subject: 'Comunicación', teacher: 'Profesora Torres' },
     { subject: 'Ciencias', teacher: 'Profesor Gómez' },
     { subject: 'Historia', teacher: 'Profesora Ruiz' },
     { subject: 'Inglés', teacher: 'Profesora Lee' },
     { subject: 'Arte', teacher: 'Profesora Díaz' },
-    { subject: 'Educación Física', teacher: 'Profesor Soto' },
-    { subject: 'Tutoría', teacher: 'Profesora Rivera' },
   ],
   Martes: [
-    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
-    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Inglés', teacher: 'Profesora Lee' },
-    { subject: 'Comunicación', teacher: 'Profesora Torres' },
     { subject: 'Historia', teacher: 'Profesora Ruiz' },
-    { subject: 'Arte', teacher: 'Profesora Díaz' },
+    { subject: 'Historia', teacher: 'Profesora Ruiz' },
+    { subject: 'Inglés', teacher: 'Profesora Lee' },
+    { subject: 'Inglés', teacher: 'Profesora Lee' },
     { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+    { subject: 'Comunicación', teacher: 'Profesora Torres' },
+    { subject: 'Arte', teacher: 'Profesora Díaz' },
+    { subject: 'Educación Física', teacher: 'Profesor Soto' },
   ],
   Miércoles: [
-    { subject: 'Historia', teacher: 'Profesora Ruiz' },
     { subject: 'Comunicación', teacher: 'Profesora Torres' },
-    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Inglés', teacher: 'Profesora Lee' },
-    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
-    { subject: 'Educación Física', teacher: 'Profesor Soto' },
+    { subject: 'Comunicación', teacher: 'Profesora Torres' },
     { subject: 'Arte', teacher: 'Profesora Díaz' },
-    { subject: 'Tutoría', teacher: 'Profesora Rivera' },
+    { subject: 'Arte', teacher: 'Profesora Díaz' },
+    { subject: 'Educación Física', teacher: 'Profesor Soto' },
+    { subject: 'Educación Física', teacher: 'Profesor Soto' },
+    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
   ],
   Jueves: [
-    { subject: 'Inglés', teacher: 'Profesora Lee' },
-    { subject: 'Historia', teacher: 'Profesora Ruiz' },
-    { subject: 'Comunicación', teacher: 'Profesora Torres' },
-    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Arte', teacher: 'Profesora Díaz' },
     { subject: 'Ciencias', teacher: 'Profesor Gómez' },
-    { subject: 'Educación Física', teacher: 'Profesor Soto' },
+    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+    { subject: 'Historia', teacher: 'Profesora Ruiz' },
+    { subject: 'Inglés', teacher: 'Profesora Lee' },
+    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
+    { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
     { subject: 'Comunicación', teacher: 'Profesora Torres' },
+    { subject: 'Arte', teacher: 'Profesora Díaz' },
   ],
   Viernes: [
     { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
-    { subject: 'Comunicación', teacher: 'Profesora Torres' },
-    { subject: 'Historia', teacher: 'Profesora Ruiz' },
-    { subject: 'Inglés', teacher: 'Profesora Lee' },
-    { subject: 'Arte', teacher: 'Profesora Díaz' },
     { subject: 'Matemáticas', teacher: 'Profesora Rivera' },
-    { subject: 'Educación Física', teacher: 'Profesor Soto' },
+    { subject: 'Comunicación', teacher: 'Profesora Torres' },
+    { subject: 'Ciencias', teacher: 'Profesor Gómez' },
+    { subject: 'Inglés', teacher: 'Profesora Lee' },
+    { subject: 'Historia', teacher: 'Profesora Ruiz' },
+    { subject: 'Tutoría', teacher: 'Profesora Rivera' },
+    { subject: 'Tutoría', teacher: 'Profesora Rivera' },
   ],
 };
 
@@ -135,34 +135,46 @@ export function HorarioEscolar() {
           <table className="w-full table-fixed border-collapse">
             <thead>
               <tr>
-                <th className="w-36 border p-3 text-left">Hora</th>
+                <th className="w-36 border border-gray-300 p-3 text-left bg-gray-100">Hora</th>
                 {days.map((d) => (
-                  <th key={d} className="border p-3 text-center">{d}</th>
+                  <th key={d} className="border border-gray-300 p-3 text-center bg-gray-100">{d}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: 8 }).map((_, idx) => (
-                <tr key={idx} className="odd:bg-white even:bg-gray-50">
-                  <td className="border p-3 font-medium">Hora {idx + 1}</td>
-                  {days.map((d) => {
-                    const slot = validatedSchedule[d][idx];
-                    const style = slot ? getCourseStyle(slot.subject) : null;
-                    return (
-                      <td key={d} className="border p-3 align-top">
-                        {slot && style ? (
-                          <div className={`p-3 rounded-lg ${style.bg} border-l-4 ${style.border}`}>
-                            <div className={`font-semibold ${style.text}`}>{slot.subject}</div>
-                            <div className="text-sm text-gray-600">{slot.teacher}</div>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-400">-</div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {Array.from({ length: 8 }).map((_, idx) => {
+                const timeSlots = [
+                  '08:00 - 08:45',
+                  '08:45 - 09:30',
+                  '09:45 - 10:30',
+                  '10:30 - 11:15',
+                  '11:30 - 12:15',
+                  '12:15 - 13:00',
+                  '13:00 - 13:45',
+                  '13:45 - 14:30'
+                ];
+                return (
+                  <tr key={idx} className="odd:bg-white even:bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-medium text-sm">{timeSlots[idx]}</td>
+                    {days.map((d) => {
+                      const slot = validatedSchedule[d][idx];
+                      const style = slot ? getCourseStyle(slot.subject) : null;
+                      return (
+                        <td key={d} className="border border-gray-300 p-3 align-top">
+                          {slot && style ? (
+                            <div className={`p-3 rounded-lg ${style.bg} border-l-4 ${style.border}`}>
+                              <div className={`font-semibold ${style.text}`}>{slot.subject}</div>
+                              <div className="text-sm text-gray-600">{slot.teacher}</div>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-400 text-center">-</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

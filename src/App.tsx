@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CoursesProvider } from './context/CoursesContext';
 import { PublicationsProvider } from './context/PublicationsContext';
+import { MessagingProvider } from './context/MessagingProvider';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -32,7 +33,8 @@ function App() {
       <AuthProvider>
         <CoursesProvider>
           <PublicationsProvider>
-          <Routes>
+            <MessagingProvider>
+              <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
@@ -194,6 +196,7 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+            </MessagingProvider>
           </PublicationsProvider>
         </CoursesProvider>
       </AuthProvider>

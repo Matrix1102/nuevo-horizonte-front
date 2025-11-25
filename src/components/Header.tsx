@@ -1,12 +1,16 @@
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
+import { useMessaging } from '../hooks/useMessaging';
 import { useNavigate, Link } from 'react-router-dom';
 import { MdMenu, MdHome, MdNotifications, MdPerson, MdLogout } from 'react-icons/md';
 
 export function Header() {
   const { user, logout } = useAuth();
   const { toggleSidebar } = useSidebar();
+  const { getUnreadCountForUser } = useMessaging();
   const navigate = useNavigate();
+  
+  const unreadCount = user ? getUnreadCountForUser(user.name) : 0;
 
   const handleLogout = () => {
     logout();
@@ -37,10 +41,16 @@ export function Header() {
       
       <div className="flex items-center gap-5">
         <button 
-          className="bg-none border-none text-2xl cursor-pointer p-2 rounded-lg transition-colors hover:bg-soft-200 text-accent-500"
-          title="Notificaciones"
+          onClick={() => navigate('/mensajeria')}
+          className="relative bg-none border-none text-2xl cursor-pointer p-2 rounded-lg transition-colors hover:bg-soft-200 text-accent-500"
+          title="Mensajería"
         >
           <MdNotifications />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
         
         <div className="relative group">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '../components/Layout';
-import { MdSchedule, MdCalendarToday, MdAccessTime, MdRoom, MdClass } from 'react-icons/md';
+import { MdSchedule, MdAccessTime, MdRoom, MdClass } from 'react-icons/md';
 
 type ClassSlot = {
   subject: string;
@@ -12,142 +12,296 @@ type ClassSlot = {
 
 type WeekSchedule = Record<string, ClassSlot[]>;
 
-// Datos simulados del horario del profesor
+// Datos simulados del horario del profesor (8 horas de 45 min c/u)
 const professorSchedule: WeekSchedule = {
   Lunes: [
     {
       subject: 'Matemáticas',
-      grade: '3° A',
+      grade: '5to Primaria A',
       room: 'Aula 201',
       startTime: '08:00',
-      endTime: '09:30'
+      endTime: '08:45'
     },
     {
       subject: 'Matemáticas',
-      grade: '4° B',
-      room: 'Aula 305',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '08:45',
+      endTime: '09:30'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
       startTime: '09:45',
+      endTime: '10:30'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '10:30',
       endTime: '11:15'
     },
     {
-      subject: 'Álgebra',
-      grade: '5° A',
-      room: 'Aula 402',
-      startTime: '12:30',
-      endTime: '14:00'
+      subject: 'Ciencias',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '11:30',
+      endTime: '12:15'
     },
     {
-      subject: 'Geometría',
-      grade: '3° C',
-      room: 'Aula 203',
-      startTime: '14:15',
-      endTime: '15:45'
+      subject: 'Historia',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '12:15',
+      endTime: '13:00'
+    },
+    {
+      subject: 'Inglés',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:00',
+      endTime: '13:45'
+    },
+    {
+      subject: 'Arte',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:45',
+      endTime: '14:30'
     }
   ],
   Martes: [
     {
-      subject: 'Matemáticas',
-      grade: '3° A',
+      subject: 'Historia',
+      grade: '5to Primaria A',
       room: 'Aula 201',
       startTime: '08:00',
+      endTime: '08:45'
+    },
+    {
+      subject: 'Historia',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '08:45',
       endTime: '09:30'
     },
     {
-      subject: 'Álgebra',
-      grade: '5° A',
-      room: 'Aula 402',
-      startTime: '10:00',
-      endTime: '11:30'
+      subject: 'Inglés',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '09:45',
+      endTime: '10:30'
     },
     {
-      subject: 'Geometría',
-      grade: '4° A',
-      room: 'Aula 304',
-      startTime: '12:30',
-      endTime: '14:00'
+      subject: 'Inglés',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '10:30',
+      endTime: '11:15'
+    },
+    {
+      subject: 'Matemáticas',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '11:30',
+      endTime: '12:15'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '12:15',
+      endTime: '13:00'
+    },
+    {
+      subject: 'Arte',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:00',
+      endTime: '13:45'
+    },
+    {
+      subject: 'Educación Física',
+      grade: '5to Primaria A',
+      room: 'Cancha',
+      startTime: '13:45',
+      endTime: '14:30'
     }
   ],
   Miércoles: [
     {
-      subject: 'Matemáticas',
-      grade: '4° B',
-      room: 'Aula 305',
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
       startTime: '08:00',
+      endTime: '08:45'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '08:45',
       endTime: '09:30'
     },
     {
-      subject: 'Álgebra',
-      grade: '5° A',
-      room: 'Aula 402',
+      subject: 'Arte',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
       startTime: '09:45',
+      endTime: '10:30'
+    },
+    {
+      subject: 'Arte',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '10:30',
       endTime: '11:15'
     },
     {
-      subject: 'Matemáticas',
-      grade: '3° A',
-      room: 'Aula 201',
-      startTime: '12:30',
-      endTime: '14:00'
+      subject: 'Educación Física',
+      grade: '5to Primaria A',
+      room: 'Cancha',
+      startTime: '11:30',
+      endTime: '12:15'
     },
     {
-      subject: 'Geometría',
-      grade: '3° C',
-      room: 'Aula 203',
-      startTime: '14:15',
-      endTime: '15:45'
+      subject: 'Educación Física',
+      grade: '5to Primaria A',
+      room: 'Cancha',
+      startTime: '12:15',
+      endTime: '13:00'
+    },
+    {
+      subject: 'Matemáticas',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:00',
+      endTime: '13:45'
+    },
+    {
+      subject: 'Ciencias',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:45',
+      endTime: '14:30'
     }
   ],
   Jueves: [
     {
-      subject: 'Geometría',
-      grade: '4° A',
-      room: 'Aula 304',
+      subject: 'Ciencias',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
       startTime: '08:00',
+      endTime: '08:45'
+    },
+    {
+      subject: 'Ciencias',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '08:45',
       endTime: '09:30'
     },
     {
-      subject: 'Matemáticas',
-      grade: '4° B',
-      room: 'Aula 305',
+      subject: 'Historia',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
       startTime: '09:45',
+      endTime: '10:30'
+    },
+    {
+      subject: 'Inglés',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '10:30',
       endTime: '11:15'
     },
     {
-      subject: 'Álgebra',
-      grade: '5° A',
-      room: 'Aula 402',
-      startTime: '12:30',
-      endTime: '14:00'
+      subject: 'Matemáticas',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '11:30',
+      endTime: '12:15'
+    },
+    {
+      subject: 'Matemáticas',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '12:15',
+      endTime: '13:00'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:00',
+      endTime: '13:45'
+    },
+    {
+      subject: 'Arte',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:45',
+      endTime: '14:30'
     }
   ],
   Viernes: [
     {
       subject: 'Matemáticas',
-      grade: '3° A',
+      grade: '5to Primaria A',
       room: 'Aula 201',
       startTime: '08:00',
-      endTime: '09:30'
-    },
-    {
-      subject: 'Geometría',
-      grade: '3° C',
-      room: 'Aula 203',
-      startTime: '09:45',
-      endTime: '11:15'
+      endTime: '08:45'
     },
     {
       subject: 'Matemáticas',
-      grade: '4° B',
-      room: 'Aula 305',
-      startTime: '12:30',
-      endTime: '14:00'
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '08:45',
+      endTime: '09:30'
+    },
+    {
+      subject: 'Comunicación',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '09:45',
+      endTime: '10:30'
+    },
+    {
+      subject: 'Ciencias',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '10:30',
+      endTime: '11:15'
+    },
+    {
+      subject: 'Inglés',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '11:30',
+      endTime: '12:15'
+    },
+    {
+      subject: 'Historia',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '12:15',
+      endTime: '13:00'
     },
     {
       subject: 'Tutoría',
-      grade: '3° A',
+      grade: '5to Primaria A',
       room: 'Aula 201',
-      startTime: '14:15',
-      endTime: '15:45'
+      startTime: '13:00',
+      endTime: '13:45'
+    },
+    {
+      subject: 'Tutoría',
+      grade: '5to Primaria A',
+      room: 'Aula 201',
+      startTime: '13:45',
+      endTime: '14:30'
     }
   ]
 };
@@ -155,10 +309,14 @@ const professorSchedule: WeekSchedule = {
 const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
 const timeSlots = [
-  { start: '08:00', end: '09:30' },
-  { start: '09:45', end: '11:15' },
-  { start: '12:30', end: '14:00' },
-  { start: '14:15', end: '15:45' }
+  { start: '08:00', end: '08:45' },
+  { start: '08:45', end: '09:30' },
+  { start: '09:45', end: '10:30' },
+  { start: '10:30', end: '11:15' },
+  { start: '11:30', end: '12:15' },
+  { start: '12:15', end: '13:00' },
+  { start: '13:00', end: '13:45' },
+  { start: '13:45', end: '14:30' }
 ];
 
 export function Horario() {
@@ -176,45 +334,28 @@ export function Horario() {
   return (
     <Layout>
       <div className="flex items-center gap-3 mb-5">
-        <span className="text-3xl text-warm-500"><MdSchedule /></span>
+        <span className="text-3xl text-accent-500"><MdSchedule /></span>
         <h2 className="text-primary-500 text-2xl font-bold">Mi Horario</h2>
       </div>
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm mb-1">Total de Clases</p>
-              <p className="text-3xl font-bold">{totalClasses}</p>
-            </div>
-            <MdClass className="text-5xl opacity-30" />
-          </div>
+        <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-accent-500">
+          <div className="text-sm text-gray-600 mb-1">Total de Clases</div>
+          <div className="text-3xl font-bold text-accent-500">{totalClasses}</div>
         </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm mb-1">Materias</p>
-              <p className="text-3xl font-bold">{uniqueSubjects}</p>
-            </div>
-            <MdCalendarToday className="text-5xl opacity-30" />
-          </div>
+        <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-accent-500">
+          <div className="text-sm text-gray-600 mb-1">Materias</div>
+          <div className="text-3xl font-bold text-accent-500">{uniqueSubjects}</div>
         </div>
-
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-100 text-sm mb-1">Grados</p>
-              <p className="text-3xl font-bold">{uniqueGrades}</p>
-            </div>
-            <MdRoom className="text-5xl opacity-30" />
-          </div>
+        <div className="bg-white p-4 rounded-xl shadow-md border-l-4 border-accent-500">
+          <div className="text-sm text-gray-600 mb-1">Grados</div>
+          <div className="text-3xl font-bold text-accent-500">{uniqueGrades}</div>
         </div>
       </div>
 
       {/* Vista de Horario Semanal */}
-      <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-warm-500 mb-6">
+      <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Horario Semanal</h3>
         
         <div className="overflow-x-auto">
@@ -244,7 +385,7 @@ export function Horario() {
                     return (
                       <td key={day} className="border border-gray-300 p-2">
                         {classInSlot ? (
-                          <div className="bg-gradient-to-br from-warm-500 to-warm-600 text-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                          <div className="bg-gradient-to-br from-accent-500 to-accent-600 text-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                             <p className="font-semibold text-sm mb-1">{classInSlot.subject}</p>
                             <p className="text-xs opacity-90 flex items-center gap-1">
                               <MdClass className="text-sm" />
@@ -269,7 +410,7 @@ export function Horario() {
       </div>
 
       {/* Vista por Día */}
-      <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-warm-500">
+      <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-accent-500">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Detalle por Día</h3>
         
         {/* Selector de día */}
@@ -280,7 +421,7 @@ export function Horario() {
               onClick={() => setSelectedDay(day)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedDay === day
-                  ? 'bg-warm-500 text-white shadow-md'
+                  ? 'bg-accent-500 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -297,19 +438,19 @@ export function Horario() {
               className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-white to-gray-50"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div className="flex-1">
+                  <div className="flex-1">
                   <h4 className="font-bold text-gray-800 text-lg mb-1">{classSlot.subject}</h4>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
-                      <MdClass className="text-warm-500" />
+                      <MdClass className="text-accent-500" />
                       {classSlot.grade}
                     </span>
                     <span className="flex items-center gap-1">
-                      <MdRoom className="text-warm-500" />
+                      <MdRoom className="text-accent-500" />
                       {classSlot.room}
                     </span>
                     <span className="flex items-center gap-1">
-                      <MdAccessTime className="text-warm-500" />
+                      <MdAccessTime className="text-accent-500" />
                       {classSlot.startTime} - {classSlot.endTime}
                     </span>
                   </div>
