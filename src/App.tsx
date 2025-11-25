@@ -20,7 +20,8 @@ import { MisCursos } from './pages/MisCursos';
 import { Horario } from './pages/Horario';
 import { Usuarios } from './pages/Usuarios';
 import { Cursos } from './pages/Cursos';
-import { Reportes } from './pages/Reportes';
+import { AlumnosMatriculados } from './pages/AlumnosMatriculados';
+import { ProfesoresContratados } from './pages/ProfesoresContratados';
 import { Unauthorized } from './pages/Unauthorized';
 import MiPerfil from './pages/MiPerfil';
 import './App.css';
@@ -173,10 +174,19 @@ function App() {
             />
             
             <Route
-              path="/reportes"
+              path="/alumnos-matriculados"
               element={
                 <ProtectedRoute>
-                  <Reportes />
+                  <AlumnosMatriculados />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profesores-contratados"
+              element={
+                <ProtectedRoute>
+                  <ProfesoresContratados />
                 </ProtectedRoute>
               }
             />

@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { Layout } from '../components/Layout';
 import { Link } from 'react-router-dom';
-import { MdClass, MdGrade, MdSchedule, MdAssignment, MdPeople, MdAssessment, MdPayment, MdCalendarToday, MdLibraryBooks } from 'react-icons/md';
+import { MdClass, MdGrade, MdSchedule, MdPeople, MdPayment, MdCalendarToday, MdLibraryBooks, MdSchool } from 'react-icons/md';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -35,9 +35,9 @@ export function Dashboard() {
             </Link>
 
             <Link to="/calificaciones" className="no-underline block h-full">
-              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500 h-full">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl text-warm-500"><MdGrade /></span>
+                  <span className="text-2xl text-accent-500"><MdGrade /></span>
                   <h3 className="text-primary-500 text-xl font-semibold">Calificaciones</h3>
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed">
@@ -47,9 +47,9 @@ export function Dashboard() {
             </Link>
 
             <Link to="/horario-escolar" className="no-underline block h-full">
-              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-secondary-500 h-full">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl text-secondary-500"><MdSchedule /></span>
+                  <span className="text-2xl text-accent-500"><MdSchedule /></span>
                   <h3 className="text-primary-500 text-xl font-semibold">Horario</h3>
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed">
@@ -60,11 +60,11 @@ export function Dashboard() {
             
             <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-accent-500"><MdAssignment /></span>
-                <h3 className="text-primary-500 text-xl font-semibold">Tareas</h3>
+                <span className="text-2xl text-accent-500"><MdCalendarToday /></span>
+                <h3 className="text-primary-500 text-xl font-semibold">Asistencias</h3>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Gestiona tus tareas y entregas
+                Consulta tu registro de asistencias
               </p>
             </div>
           </>
@@ -81,18 +81,18 @@ export function Dashboard() {
                 Gestiona tus clases y estudiantes
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500">
+            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-warm-500"><MdGrade /></span>
+                <span className="text-2xl text-accent-500"><MdGrade /></span>
                 <h3 className="text-primary-500 text-xl font-semibold">Calificaciones</h3>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
                 Registra y actualiza calificaciones
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-secondary-500">
+            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-secondary-500"><MdLibraryBooks /></span>
+                <span className="text-2xl text-accent-500"><MdLibraryBooks /></span>
                 <h3 className="text-primary-500 text-xl font-semibold">Materiales</h3>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
@@ -113,27 +113,31 @@ export function Dashboard() {
 
         {user?.type === 'administrativo' && (
           <>
+            <Link to="/alumnos-matriculados" className="no-underline block h-full">
+              <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500 h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl text-accent-500"><MdSchool /></span>
+                  <h3 className="text-primary-500 text-xl font-semibold">Alumnos Matriculados</h3>
+                </div>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  Gestión de alumnos matriculados
+                </p>
+              </div>
+            </Link>
+
             <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl text-accent-500"><MdPeople /></span>
                 <h3 className="text-primary-500 text-xl font-semibold">Usuarios</h3>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Gestión de alumnos y profesores
+                Gestión de usuarios del sistema
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-warm-500">
+
+            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-accent-500">
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-warm-500"><MdAssessment /></span>
-                <h3 className="text-primary-500 text-xl font-semibold">Reportes</h3>
-              </div>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Estadísticas y reportes generales
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-md transition-all cursor-pointer hover:-translate-y-1 hover:shadow-lg border-t-4 border-secondary-500">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl text-secondary-500"><MdPayment /></span>
+                <span className="text-2xl text-accent-500"><MdPayment /></span>
                 <h3 className="text-primary-500 text-xl font-semibold">Pagos</h3>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">

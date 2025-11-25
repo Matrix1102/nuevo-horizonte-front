@@ -11,7 +11,8 @@ import {
   MdSchedule,
   MdClass,
   MdPeople,
-  MdAssessment 
+  MdSchool,
+  MdPersonAdd 
 } from 'react-icons/md';
 import logo from '../assets/login-bg-logo.png';
 
@@ -45,9 +46,10 @@ export function Sidebar() {
   const adminMenuItems = [
     { path: '/publicaciones', label: 'Publicaciones', icon: <MdCampaign /> },
     { path: '/usuarios', label: 'Usuarios', icon: <MdPeople /> },
+    { path: '/alumnos-matriculados', label: 'Alumnos Matriculados', icon: <MdSchool /> },
+    { path: '/profesores-contratados', label: 'Profesores Contratados', icon: <MdPersonAdd /> },
     { path: '/cursos', label: 'Cursos', icon: <MdClass /> },
     { path: '/pagos', label: 'Pagos', icon: <MdPayment /> },
-    { path: '/reportes', label: 'Reportes', icon: <MdAssessment /> },
     { path: '/mensajeria', label: 'Mensajería', icon: <MdMessage /> }
   ];
 
