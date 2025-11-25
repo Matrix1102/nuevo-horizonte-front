@@ -1,5 +1,8 @@
+// src/App.tsx - ACTUALIZADO
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CoursesProvider } from './context/CoursesContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -25,159 +28,161 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+        <CoursesProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/mi-perfil"
-            element={
-              <ProtectedRoute>
-                <MiPerfil />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/publicaciones"
-            element={
-              <ProtectedRoute>
-                <Publicaciones />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/mensajeria"
-            element={
-              <ProtectedRoute>
-                <Mensajeria />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Rutas de Calificaciones */}
-          <Route
-            path="/calificaciones"
-            element={
-              <ProtectedRoute allowedTypes={['alumno']}>
-                <Calificaciones />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/calificaciones-profesor"
-            element={
-              <ProtectedRoute allowedTypes={['profesor']}>
-                <CalificacionesProfesor />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/pagos"
-            element={
-              <ProtectedRoute>
-                <Pagos />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Rutas de Asistencia */}
-          <Route
-            path="/asistencia"
-            element={
-              <ProtectedRoute allowedTypes={['alumno']}>
-                <Asistencia />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/asistencia-profesor"
-            element={
-              <ProtectedRoute allowedTypes={['profesor']}>
-                <AsistenciaProfesor />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/matricula-web"
-            element={
-              <ProtectedRoute>
-                <MatriculaWeb />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/horario-escolar"
-            element={
-              <ProtectedRoute>
-                <HorarioEscolar />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/mis-cursos"
-            element={
-              <ProtectedRoute>
-                <MisCursos />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/horario"
-            element={
-              <ProtectedRoute>
-                <Horario />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/usuarios"
-            element={
-              <ProtectedRoute>
-                <Usuarios />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/cursos"
-            element={
-              <ProtectedRoute>
-                <Cursos />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/reportes"
-            element={
-              <ProtectedRoute>
-                <Reportes />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+            <Route
+              path="/mi-perfil"
+              element={
+                <ProtectedRoute>
+                  <MiPerfil />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/publicaciones"
+              element={
+                <ProtectedRoute>
+                  <Publicaciones />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/mensajeria"
+              element={
+                <ProtectedRoute>
+                  <Mensajeria />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Rutas de Calificaciones */}
+            <Route
+              path="/calificaciones"
+              element={
+                <ProtectedRoute allowedTypes={['alumno']}>
+                  <Calificaciones />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/calificaciones-profesor"
+              element={
+                <ProtectedRoute allowedTypes={['profesor']}>
+                  <CalificacionesProfesor />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/pagos"
+              element={
+                <ProtectedRoute>
+                  <Pagos />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Rutas de Asistencia */}
+            <Route
+              path="/asistencia"
+              element={
+                <ProtectedRoute allowedTypes={['alumno']}>
+                  <Asistencia />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/asistencia-profesor"
+              element={
+                <ProtectedRoute allowedTypes={['profesor']}>
+                  <AsistenciaProfesor />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/matricula-web"
+              element={
+                <ProtectedRoute>
+                  <MatriculaWeb />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/horario-escolar"
+              element={
+                <ProtectedRoute>
+                  <HorarioEscolar />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/mis-cursos"
+              element={
+                <ProtectedRoute>
+                  <MisCursos />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/horario"
+              element={
+                <ProtectedRoute>
+                  <Horario />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/usuarios"
+              element={
+                <ProtectedRoute>
+                  <Usuarios />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/cursos"
+              element={
+                <ProtectedRoute>
+                  <Cursos />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/reportes"
+              element={
+                <ProtectedRoute>
+                  <Reportes />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </CoursesProvider>
       </AuthProvider>
     </BrowserRouter>
   );
