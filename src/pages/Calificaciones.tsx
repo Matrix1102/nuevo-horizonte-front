@@ -3,21 +3,14 @@ import { Layout } from '../components/Layout';
 import { MdGrade, MdPictureAsPdf, MdExpandMore, MdCheck } from 'react-icons/md';
 import { Listbox, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { useCourses } from '../context/CoursesContext';
+import { useAuth } from '../context/AuthContext';
 
 type CourseGrade = {
   id: string;
   course: string;
   periods: (number | null)[]; // 4 periods
 };
-
-const simulatedGrades: CourseGrade[] = [
-  { id: 'c1', course: 'Matemáticas', periods: [15, 14.5, 16, 15.5] },
-  { id: 'c2', course: 'Comunicación', periods: [13.5, 14, 14.5, 15] },
-  { id: 'c3', course: 'Ciencias', periods: [12, 13, 13.5, 14] },
-  { id: 'c4', course: 'Historia', periods: [16, 15.5, 16, 16] },
-  { id: 'c5', course: 'Inglés', periods: [14, 14.5, 15, null] },
-  { id: 'c6', course: 'Arte', periods: [17, 16.5, 17, 17] },
-];
 
 function computeFinal(periods: (number | null)[]) {
   const nums = periods.filter((p): p is number => typeof p === 'number');
@@ -28,13 +21,39 @@ function computeFinal(periods: (number | null)[]) {
 
 export function Calificaciones() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>('Todos');
+  const { courseGrades, courses } = useCourses();
+  const { user } = useAuth();
+
+  // Obtener los cursos del estudiante actual y sus calificaciones
+  const studentGrades = useMemo(() => {
+    if (!user) return [];
+
+    // Encontrar cursos donde está inscrito el estudiante
+    const studentCourses = courses.filter(course =>
+      course.students.some(student => student.id === `s${user.id}`)
+    );
+
+    // Obtener las calificaciones de esos cursos
+    return studentCourses.map(course => {
+      const gradeData = courseGrades.find(g => g.courseId === course.id);
+      const studentGradeRecord = gradeData?.grades.find(
+        g => g.studentId === `s${user.id}`
+      );
+
+      return {
+        id: course.id,
+        course: course.name,
+        periods: studentGradeRecord?.grades || [null, null, null, null]
+      };
+    });
+  }, [user, courses, courseGrades]);
 
   const periods = useMemo(
     () => ['Todos', '1er Bimestre', '2do Bimestre', '3er Bimestre', '4to Bimestre'],
     []
   );
 
-  const rows = useMemo(() => simulatedGrades.map((g) => ({ ...g, final: computeFinal(g.periods) })), []);
+  const rows = useMemo(() => studentGrades.map((g) => ({ ...g, final: computeFinal(g.periods) })), [studentGrades]);
 
   return (
     <Layout>
@@ -105,15 +124,15 @@ export function Calificaciones() {
         </div>
 
         <div className="overflow-x-auto print-content">
-          <table className="w-full table-auto border-collapse">
+          <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50">
-                <th className="text-left px-4 py-3 border">Cursos</th>
-                <th className={`text-center px-4 py-3 border ${selectedPeriod === '1er Bimestre' ? 'bg-blue-50' : ''}`}>1°</th>
-                <th className={`text-center px-4 py-3 border ${selectedPeriod === '2do Bimestre' ? 'bg-blue-50' : ''}`}>2°</th>
-                <th className={`text-center px-4 py-3 border ${selectedPeriod === '3er Bimestre' ? 'bg-blue-50' : ''}`}>3°</th>
-                <th className={`text-center px-4 py-3 border ${selectedPeriod === '4to Bimestre' ? 'bg-blue-50' : ''}`}>4°</th>
-                <th className="text-center px-4 py-3 border">N. Final</th>
+                <th className="text-left px-4 py-3 border w-2/5">Cursos</th>
+                <th className={`text-center px-4 py-3 border w-1/12 ${selectedPeriod === '1er Bimestre' ? 'bg-blue-50' : ''}`}>1°</th>
+                <th className={`text-center px-4 py-3 border w-1/12 ${selectedPeriod === '2do Bimestre' ? 'bg-blue-50' : ''}`}>2°</th>
+                <th className={`text-center px-4 py-3 border w-1/12 ${selectedPeriod === '3er Bimestre' ? 'bg-blue-50' : ''}`}>3°</th>
+                <th className={`text-center px-4 py-3 border w-1/12 ${selectedPeriod === '4to Bimestre' ? 'bg-blue-50' : ''}`}>4°</th>
+                <th className="text-center px-4 py-3 border w-1/6">N. Final</th>
               </tr>
             </thead>
             <tbody>

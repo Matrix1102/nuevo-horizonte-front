@@ -14,34 +14,60 @@
 
 /* Estilos para impresión */
 @media print {
-  /* Ocultar todo excepto el contenido de impresión */
-  body * {
-    visibility: hidden;
+  /* Ocultar sidebar y header */
+  aside, header {
+    display: none !important;
   }
   
-  /* Mostrar solo la tabla de calificaciones */
-  .print-content,
-  .print-content * {
-    visibility: visible;
-  }
-  
-  .print-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-  
-  /* Ocultar elementos de navegación y controles */
+  /* Ocultar elementos marcados como no-print */
   .no-print {
+    display: none !important;
+  }
+  
+  /* Ajustar márgenes de página */
+  @page {
+    margin: 1cm;
+    size: letter portrait;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Resetear padding del contenedor principal */
+  .flex-1 {
+    padding-left: 0 !important;
+  }
+  
+  /* Ocultar marca de agua */
+  .absolute.inset-0 img {
     display: none !important;
   }
   
   /* Ajustar tabla para impresión */
   .print-content table {
     page-break-inside: avoid;
-    width: 100%;
+    width: 100% !important;
     border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+  }
+  
+  /* Ajustar anchos de columnas para impresión */
+  .print-content table th:first-child,
+  .print-content table td:first-child {
+    width: 35% !important;
+  }
+  
+  .print-content table th:not(:first-child):not(:last-child),
+  .print-content table td:not(:first-child):not(:last-child) {
+    width: 11% !important;
+  }
+  
+  .print-content table th:last-child,
+  .print-content table td:last-child {
+    width: 15% !important;
   }
   
   /* Asegurar que los bordes se vean en impresión */

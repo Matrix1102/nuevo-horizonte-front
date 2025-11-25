@@ -12,9 +12,23 @@ export function MisCursos() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Filtrar cursos asignados al profesor actual
+  // Filtrar cursos según el tipo de usuario
   const myCourses = useMemo(() => {
-    return courses.filter(course => course.teacherId === user?.id);
+    if (!user) return [];
+    
+    // Si es profesor, mostrar cursos que enseña
+    if (user.type === 'profesor') {
+      return courses.filter(course => course.teacherId === user.id);
+    }
+    
+    // Si es alumno, mostrar cursos donde está inscrito
+    if (user.type === 'alumno') {
+      return courses.filter(course =>
+        course.students.some(student => student.id === `s${user.id}`)
+      );
+    }
+    
+    return [];
   }, [courses, user]);
 
   return (
@@ -57,29 +71,31 @@ export function MisCursos() {
                   <div className="flex items-center gap-2 mb-4 pb-4 border-b">
                     <MdPeople className="text-xl text-accent-500" />
                     <span className="font-semibold text-gray-700">
-                      {course.students.length} Alumnos
+                      {user?.type === 'profesor' ? `${course.students.length} Alumnos` : course.teacherName}
                     </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => navigate('/calificaciones-profesor', { state: { courseId: course.id } })}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
-                    >
-                      <MdGrade className="text-xl" />
-                      <span>Ver Calificaciones</span>
-                    </button>
+                  {user?.type === 'profesor' && (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => navigate('/calificaciones-profesor', { state: { courseId: course.id } })}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
+                      >
+                        <MdGrade className="text-xl" />
+                        <span>Ver Calificaciones</span>
+                      </button>
 
-                    <button
-                      onClick={() => navigate('/asistencia-profesor', { state: { courseId: course.id } })}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 font-medium transition-colors"
-                    >
-                      <MdCheckCircle className="text-xl" />
-                      <span>Tomar Asistencia</span>
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => navigate('/asistencia-profesor', { state: { courseId: course.id } })}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 font-medium transition-colors"
+                      >
+                        <MdCheckCircle className="text-xl" />
+                        <span>Tomar Asistencia</span>
+                      </button>
+                    </div>
+                  )}
 
-                  {course.students.length > 0 && (
+                  {user?.type === 'profesor' && course.students.length > 0 && (
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-xs text-gray-500 mb-2 font-semibold">Alumnos inscritos:</p>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
